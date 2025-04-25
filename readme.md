@@ -12,7 +12,8 @@ This project implements and evaluates a cellular automata (CA) model for wildfir
 - **data/**: Contains MTBS (Monitoring Trends in Burn Severity) fire datasets
   - Each subfolder contains data for a specific historical fire event
 - **main.ipynb**: Main notebook for running simulations and evaluating intervention strategies
-- **calibration.ipynb**: Notebook for optimizing model parameters using genetic algorithms
+- **calibration.ipynb**: Notebook for optimizing model parameters using genetic algorithms [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/USERNAME/REPOSITORY/blob/BRANCH/PATH/TO/NOTEBOOK.ipynb](https://github.com/Coeze/MX4553_Modelling_Theory_Project/blob/main/calibration.ipynb))
+
 - **cnn_detection.ipynb**: Experimental machine learning approach for fire detection
 - **optimal_parameters.json**: Stores optimized model parameters
 
