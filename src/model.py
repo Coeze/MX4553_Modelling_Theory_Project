@@ -34,7 +34,7 @@ class CA:
     "Machine Learning-Based Forest Fire Spread Modeling Using Cellular Automata"
     """
     
-    def __init__(self, grid_size=(100, 100), cell_size=1, p0=0.5):
+    def __init__(self, grid_size=(100, 100), cell_size=1, params=None):
         """
         Initialize the CA model
         
@@ -81,7 +81,9 @@ class CA:
         self.actual_burned_area = None
         self.risk_map = None
         
-        self.p0 = p0
+        self.c1 = params['c1'] if params else 0.5
+        self.c2 = params['c2'] if params else 0.5
+        self.p0 = params['p0'] if params else 0.5
     
     def load_environmental_data(self, slope, aspect, elevation, humidity, ndvi):
         """
@@ -167,7 +169,7 @@ class CA:
         precipitation_factor = np.exp((abs(p)) * precipitation)
         return precipitation_factor
     
-    def calculate_ignition_probability(self, row, col, params=None):
+    def calculate_ignition_probability(self, row, col):
         """
         Calculate the probability of a cell igniting using LSSVM
         As described in Section 2.3 of the paper
@@ -178,10 +180,6 @@ class CA:
         Returns:
         - probability: ignition probability [0, 1]
         """
-        #Model Constants
-        self.c1 = params['c1'] if params else 0.5
-        self.c2 = params['c2'] if params else 0.5
-        self.p0 = params['p0'] if params else 0.5
         
         
         if not (0 <= row < self.rows and 0 <= col < self.cols):
