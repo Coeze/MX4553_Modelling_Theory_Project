@@ -106,7 +106,7 @@ class CA:
         self.humidity = humidity
         self.ndvi = ndvi
     
-    def set_environmental_data(self, wind_speed, wind_direction, temperature):
+    def set_environmental_data(self, wind_speed, wind_direction, temperature, humidity):
         """
         Set wind parameters for simulation
         
