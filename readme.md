@@ -104,14 +104,6 @@ The model evaluates several intervention strategies:
 - Web-based visualization interface
 - Integration with remote sensing data for early detection
 
-## Contributors
-
-- [Your Name] - Initial work and development
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgments
 
 - MTBS program for providing fire data
