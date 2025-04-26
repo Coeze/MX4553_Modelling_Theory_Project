@@ -22,6 +22,8 @@ import random
 from deap import base, creator, tools, algorithms
 from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import display, HTML
+from skimage.transform import resize
+
 
 
 
@@ -264,7 +266,6 @@ class CA:
         elif fire == "alabama":
             burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
             dnbr_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
-        else:
         try:
             self.actual_burned_area = self.load_shapefile_as_raster(burn_bndy_path)
             print(f"Loaded burn perimeter successfully")
@@ -272,40 +273,31 @@ class CA:
             print(f"Error loading burn perimeter: {str(e)}")
             return False
         
-        if dnbr_path:
-            try:
-                # DNBR can be used to estimate vegetation (NDVI)
-                with rasterio.open(dnbr_path) as src:
-                    dnbr_data = src.read(1)
+    
+        try:
+            with rasterio.open(dnbr_path) as src:
+                dnbr_data = src.read(1)
+                # Save transform for georeferencing
+                self.transform = src.transform
+                self.crs = src.crs
+                
+                if dnbr_data.shape != (self.rows, self.cols):
+                    print(f"Resampling DNBR data from {dnbr_data.shape} to {(self.rows, self.cols)}")
+                    dnbr_data = resize(dnbr_data, (self.rows, self.cols), preserve_range=True)
+                
+                dnbr_min = np.nanmin(dnbr_data)
+                dnbr_max = np.nanmax(dnbr_data)
+                if dnbr_max > dnbr_min:
+                    normalized_dnbr = (dnbr_data - dnbr_min) / (dnbr_max - dnbr_min)
+                    self.ndvi = 0.2 + 0.6 * normalized_dnbr  # Scale to 0.2-0.8 range
+                else:
+                    self.ndvi = np.ones((self.rows, self.cols)) * 0.5
                     
-                    # Save transform for georeferencing
-                    self.transform = src.transform
-                    self.crs = src.crs
-                    
-                    # Resample to match model grid if necessary
-                    if dnbr_data.shape != (self.rows, self.cols):
-                        print(f"Resampling DNBR data from {dnbr_data.shape} to {(self.rows, self.cols)}")
-                        # For simplicity, just resize using numpy (a proper resampling would use rasterio)
-                        from skimage.transform import resize
-                        dnbr_data = resize(dnbr_data, (self.rows, self.cols), preserve_range=True)
-                    
-                    dnbr_min = np.nanmin(dnbr_data)
-                    dnbr_max = np.nanmax(dnbr_data)
-                    if dnbr_max > dnbr_min:
-                        normalized_dnbr = (dnbr_data - dnbr_min) / (dnbr_max - dnbr_min)
-                        self.ndvi = 0.2 + 0.6 * normalized_dnbr  # Scale to 0.2-0.8 range
-                    else:
-                        self.ndvi = np.ones((self.rows, self.cols)) * 0.5
-                        
-                    print("Estimated NDVI from DNBR data")
-            except Exception as e:
-                print(f"Error processing DNBR data: {str(e)}")
-                # Generate random NDVI if DNBR processing fails
-                self.ndvi = np.random.uniform(0.1, 0.8, (self.rows, self.cols))
-        else:
-            # Generate random NDVI if no DNBR data
+                print("Estimated NDVI from DNBR data")
+        except Exception as e:
+            print(f"Error processing DNBR data: {str(e)}")
+            # Generate random NDVI if DNBR processing fails
             self.ndvi = np.random.uniform(0.1, 0.8, (self.rows, self.cols))
-            print("Generated random NDVI (no DNBR data available)")
         
         self.slope = np.random.uniform(0, 30, (self.rows, self.cols))  # 0-30 degree slopes
         self.aspect = np.random.uniform(0, 360, (self.rows, self.cols))  # 0-360 degree aspects
