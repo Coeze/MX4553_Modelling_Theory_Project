@@ -71,6 +71,7 @@ class CA:
         #Environmental factors
         self.wind_speed = 0
         self.wind_direction = 0  # in degrees
+        self.fire_direction = 10
         self.temperature = 80
         self.precipitation = 0.0
         self.humidity = 5
@@ -108,7 +109,7 @@ class CA:
         self.humidity = humidity
         self.ndvi = ndvi
     
-    def set_environmental_data(self, wind_speed, wind_direction, temperature, humidity):
+    def set_environmental_data(self, wind_speed, wind_direction, temperature, humidity, fire_direction):
         """
         Set wind parameters for simulation
         
@@ -120,6 +121,7 @@ class CA:
         self.wind_direction = wind_direction
         self.temperature = temperature
         self.humidity = humidity
+        self.fire_direction = fire_direction
     
     
     def set_initial_fire(self, fire_points):
@@ -138,8 +140,15 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(self.wind_direction)) - 1)))
+        angle_diff = self.fire_direction - self.wind_direction
+        # Convert to radians and calculate cosine
+        angle_cos = np.cos(np.radians(angle_diff))
+        
+        # Apply the exponential wind effect formula
+        wind_factor = np.exp(self.wind_speed * (self.wind_c1 + self.wind_c2 * (angle_cos - 1)))
+
         return wind_factor
+
 
     def topography_effect(self, slope):
         """
