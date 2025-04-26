@@ -588,8 +588,12 @@ class CA:
         if cell_size is None:
             cell_size = self.cell_size
 
-        
-        burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+        if folder_path == "arizona":
+            burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+        elif folder_path == "alabama":
+            burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+        else:
+            raise ValueError('Please select a valid fire either: alabama or arizona')
 
         self.actual_burned_area = self.load_shapefile_as_raster(burn_bndy_path, grid_size, cell_size)
         print(f"Loaded burn perimeter shapefile: {burn_bndy_path}")
@@ -597,11 +601,6 @@ class CA:
         dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
         dnbr_data = self.load_raster_data(dnbr_path, grid_size)
         print(f"Loaded DNBR raster: {dnbr_path}")
-            
-            # DNBR can be used as a proxy for burn severity
-            # We could use this to extract training data for our model
-        
-        # We could also load other data like reflectance, slope, etc.
     
     def overlay_simulation_with_actual(self, figsize=(15, 8)):
         """
