@@ -243,7 +243,7 @@ class CA:
         # Update grid
         self.grid = np.copy(self.next_grid)
     
-    def initialize_from_mtbs_data(self, fire_folder_path, ignition_date=None, use_hotspots=False):
+    def initialize_from_mtbs_data(self, fire):
         """
         Initialize the grid and environmental data from MTBS fire data
         
@@ -255,32 +255,16 @@ class CA:
         Returns:
         - success: boolean indicating if initialization was successful
         """
-        print(f"Initializing from MTBS fire data folder: {fire_folder_path}")
-        
-        # Find burn boundary shapefile
-        burn_bndy_files = [f for f in os.listdir(fire_folder_path) if f.endswith('burn_bndy.shp')]
-        if not burn_bndy_files:
-            print("Error: No burn boundary shapefile found")
-            return False
-        
-        burn_bndy_path = os.path.join(fire_folder_path, burn_bndy_files[0])
-        print(f"Found burn boundary shapefile: {burn_bndy_path}")
-        
-        # Find DNBR or NBR raster file
-        raster_files = [f for f in os.listdir(fire_folder_path) if f.endswith('dnbr.tif') or f.endswith('nbr.tif')]
-        if not raster_files:
-            print("Warning: No DNBR/NBR raster found")
-            dnbr_path = None
-        else:
-            dnbr_path = os.path.join(fire_folder_path, raster_files[0])
-            print(f"Found burn severity raster: {dnbr_path}")
-        
-        # Find reflectance files (pre and post fire)
-        refl_files = [f for f in os.listdir(fire_folder_path) if f.endswith('refl.tif')]
-        if len(refl_files) < 2:
-            print("Warning: Not enough reflectance files found for pre/post analysis")
+        print(f"Initializing from {fire} fire")
         
         # Load burn perimeter as raster
+        if fire == "arizona":
+            burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+            dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
+        elif fire == "alabama":
+            burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+            dnbr_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
+        else:
         try:
             self.actual_burned_area = self.load_shapefile_as_raster(burn_bndy_path)
             print(f"Loaded burn perimeter successfully")
@@ -288,7 +272,6 @@ class CA:
             print(f"Error loading burn perimeter: {str(e)}")
             return False
         
-        # Derive environmental factors from available data
         if dnbr_path:
             try:
                 # DNBR can be used to estimate vegetation (NDVI)
@@ -306,9 +289,6 @@ class CA:
                         from skimage.transform import resize
                         dnbr_data = resize(dnbr_data, (self.rows, self.cols), preserve_range=True)
                     
-                    # Use DNBR to estimate NDVI (higher DNBR often correlates with higher pre-fire vegetation)
-                    # This is a simplified approach - could be refined with actual reflectance data
-                    # Scale DNBR to 0-1 range for NDVI
                     dnbr_min = np.nanmin(dnbr_data)
                     dnbr_max = np.nanmax(dnbr_data)
                     if dnbr_max > dnbr_min:
