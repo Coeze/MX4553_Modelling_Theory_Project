@@ -29,14 +29,14 @@ from skimage.transform import resize
 
 class CA:
     """
-    LSSVM-CA: A forest fire spread modeling method combining Least Squares Support Vector Machines
+    CA: A forest fire spread modeling method combining Least Squares Support Vector Machines
     with Cellular Automata as described in the paper
     "Machine Learning-Based Forest Fire Spread Modeling Using Cellular Automata"
     """
     
     def __init__(self, grid_size=(100, 100), cell_size=1, p0=0.5):
         """
-        Initialize the LSSVM-CA model
+        Initialize the CA model
         
         Parameters:
         - grid_size: tuple, dimensions of the grid (rows, cols)
@@ -203,9 +203,6 @@ class CA:
                 if 0 <= nr < self.rows and 0 <= nc < self.cols and self.grid[nr, nc] == 1:
                     highest_veg_prob = max(highest_veg_prob, self.fuel_model[self.fuel_type[nr, nc], self.fuel_type[row, col]])
                     has_burning_neighbors = True
-            if has_burning_neighbors:
-                break
-        
         if not has_burning_neighbors:
             return 0.0
 
@@ -215,7 +212,7 @@ class CA:
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-        adjusted_probability = self.p0 * ((1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects)) / ((humidity_effects) * (precipitation_effect)) 
+        adjusted_probability = self.p0 * ((1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects)) / ((precipitation_effect)) 
         print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
