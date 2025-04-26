@@ -145,7 +145,7 @@ class CA:
         angle_cos = np.cos(np.radians(angle_diff))
         
         # Apply the exponential wind effect formula
-        wind_factor = np.exp(self.wind_speed * (self.wind_c1 + self.wind_c2 * (angle_cos - 1)))
+        wind_factor = np.exp(self.wind_speed * (self.c1 + self.c2 * (angle_cos - 1)))
 
         return wind_factor
 
