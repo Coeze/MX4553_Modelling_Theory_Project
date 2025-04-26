@@ -520,15 +520,16 @@ class CA:
 
         if folder_path == "arizona":
             burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+            dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
         elif folder_path == "alabama":
             burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+            dnbr_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
         else:
             raise ValueError('Please select a valid fire either: alabama or arizona')
 
         self.actual_burned_area = self.load_shapefile_as_raster(burn_bndy_path, grid_size, cell_size)
         print(f"Loaded burn perimeter shapefile: {burn_bndy_path}")
         
-        dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
         dnbr_data = self.load_raster_data(dnbr_path, grid_size)
         print(f"Loaded DNBR raster: {dnbr_path}")
     
