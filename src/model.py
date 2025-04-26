@@ -500,7 +500,7 @@ class CA:
         elif folder_path == "alabama":
             burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
             dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
-            self.set_initial_fire([(25, 75)])
+            self.set_initial_fire([(25, 25)])
         else:
             raise ValueError('Please select a valid fire either: alabama or arizona')
 
