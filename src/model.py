@@ -101,7 +101,6 @@ class CA:
         assert aspect.shape == (self.rows, self.cols), "Aspect array shape mismatch"
         assert elevation.shape == (self.rows, self.cols), "Elevation array shape mismatch"
         assert humidity.shape == (self.rows, self.cols), "Humidity array shape mismatch"
-        assert ndvi.shape == (self.rows, self.cols), "NDVI array shape mismatch"
         
         self.slope = slope
         self.aspect = aspect
