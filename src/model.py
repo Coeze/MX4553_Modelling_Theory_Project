@@ -202,15 +202,6 @@ class CA:
         
         if not has_burning_neighbors:
             return 0.0
-        
-        # Extract features for the current cell
-        features = np.array([
-            self.slope[row, col],
-            self.aspect[row, col],
-            self.elevation[row, col],
-            self.humidity[row, col],
-            self.ndvi[row, col]
-        ]).reshape(1, -1)
 
         wind_effects = self.wind_effect(self.c1, self.c2)
         topography_effects = self.topography_effect(self.slope[row, col])
