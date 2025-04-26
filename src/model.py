@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 from matplotlib_scalebar.scalebar import ScaleBar
+from matplotlib.animation import FuncAnimation
 import math
 from sklearn.svm import SVC
 import geopandas as gpd
@@ -20,6 +21,9 @@ from shapely.geometry import box, mapping
 import random
 from deap import base, creator, tools, algorithms
 from mpl_toolkits.mplot3d import Axes3D
+from IPython.display import display, HTML
+
+
 
 class CA:
     """
@@ -373,14 +377,14 @@ class CA:
             plt.title(f"Forest Fire Spread Simulation - Step {frame}")
             plt.axis('off')
         
-        from matplotlib.animation import FuncAnimation
         anim = FuncAnimation(
             plt.gcf(), update_plot, frames=len(history), 
             interval=interval_ms, repeat=False
         )
         
         plt.tight_layout()
-        plt.show()
+        
+        display(HTML(anim.to_jshtml()))
         
         return anim
     
