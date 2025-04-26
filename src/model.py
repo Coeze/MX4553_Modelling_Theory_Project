@@ -261,11 +261,11 @@ class CA:
         
         # Load burn perimeter as raster
         if fire == "arizona":
-            burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
-            dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
+            burn_bndy_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+            dnbr_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
         elif fire == "alabama":
-            burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
-            dnbr_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
+            burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+            dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
         try:
             self.actual_burned_area = self.load_shapefile_as_raster(burn_bndy_path)
             print(f"Loaded burn perimeter successfully")
