@@ -166,7 +166,6 @@ class CA:
         """   
         precipitation_factor = np.exp((abs(p)) * precipitation)
         return precipitation_factor
-
     
     def calculate_ignition_probability(self, row, col, params=None):
         """
@@ -212,7 +211,8 @@ class CA:
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-        adjusted_probability = self.p0 * ((1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects)) / ((precipitation_effect)) 
+         # * (temperature_effects)) / ((precipitation_effect)) 
+        adjusted_probability = self.p0 * ((1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects)
         print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
@@ -488,9 +488,11 @@ class CA:
         if folder_path == "arizona":
             burn_bndy_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
             dnbr_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
+            self.set_initial_fire([(50, 50)])
         elif folder_path == "alabama":
             burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
             dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
+            self.set_initial_fire([(25, 75)])
         else:
             raise ValueError('Please select a valid fire either: alabama or arizona')
 
