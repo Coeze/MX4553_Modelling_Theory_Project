@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model import CA
+from src.model import CA
 
 def apply_firebreak_strategy(model, steps):
     """
