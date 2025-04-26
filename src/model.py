@@ -167,7 +167,6 @@ class CA:
 
     def sigmoid(self, x):
         return 1 / (1 + math.exp(-x))
-
     
     def temperature_effect(self, temperature, t=0.0194):
         """
@@ -224,7 +223,7 @@ class CA:
         p_density = self.ndvi[row, col] * 0.5 + 0.5
 
         wind_slope_factor = self.sigmoid(wind_effects * topography_effects)
-        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_slope_factor
+        adjusted_probability = (self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_slope_factor)/(humidity_effects * precipitation_effect)
         print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
