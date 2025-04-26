@@ -514,11 +514,11 @@ class CA:
             cell_size = self.cell_size
 
         if folder_path == "arizona":
-            burn_bndy_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
-            dnbr_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
+            burn_bndy_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+            dnbr_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
         elif folder_path == "alabama":
-            burn_bndy_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
-            dnbr_path = 'al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
+            burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+            dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
         else:
             raise ValueError('Please select a valid fire either: alabama or arizona')
 
