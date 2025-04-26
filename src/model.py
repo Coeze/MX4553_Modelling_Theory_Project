@@ -216,8 +216,8 @@ class CA:
             return 0.0
 
         wind_effects = self.wind_effect(self.c1, self.c2)
-        topography_effects = self.topography_effect(self.slope[row, col])
-        humidity_effects = self.humidity_effect(self.humidity)
+        topography_effects = self.topography_effect(self.slope[row, col], self.aspect[row,col])
+        humidity_effects = self.humidity_effect(self.humidity[row,col]/100)
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
