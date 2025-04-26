@@ -86,7 +86,7 @@ class CA:
         self.c2 = params['c2'] if params else 0.5
         self.p0 = params['p0'] if params else 0.5
     
-    def load_environmental_data(self, slope, aspect, elevation, humidity, ndvi):
+    def load_terrain_data(self, slope, aspect, elevation, humidity):
         """
         Load environmental data for the grid
         
@@ -107,7 +107,6 @@ class CA:
         self.aspect = aspect
         self.elevation = elevation
         self.humidity = humidity
-        self.ndvi = ndvi
     
     def set_environmental_data(self, wind_speed, wind_direction, temperature, humidity, fire_direction):
         """
@@ -251,7 +250,7 @@ class CA:
         # Update grid
         self.grid = np.copy(self.next_grid)
     
-    def initialize_from_mtbs_data(self, fire):
+    def initialise_ndvi_from_data(self, fire):
         """
         Initialize the grid and environmental data from MTBS fire data
         
