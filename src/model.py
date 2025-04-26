@@ -323,83 +323,13 @@ class CA:
             self.ndvi = np.random.uniform(0.1, 0.8, (self.rows, self.cols))
             print("Generated random NDVI (no DNBR data available)")
         
-        # Try to extract metadata for environmental factors
-        metadata_files = [f for f in os.listdir(fire_folder_path) if f.endswith('metadata.xml')]
-        if metadata_files:
-            metadata_path = os.path.join(fire_folder_path, metadata_files[0])
-            try:
-                import xml.etree.ElementTree as ET
-                tree = ET.parse(metadata_path)
-                root = tree.getroot()
-                
-                # Extract ignition date if not provided
-                if ignition_date is None:
-                    # Look for fire date information in metadata
-                    # This is a simplified approach - actual XML structure may vary
-                    date_elements = root.findall(".//FireDate") or root.findall(".//fire_date")
-                    if date_elements and len(date_elements) > 0:
-                        ignition_date = date_elements[0].text
-                        print(f"Found ignition date in metadata: {ignition_date}")
-                
-                # Extract other useful information like terrain, weather conditions
-                # This would depend on the specific structure of your metadata XML
-                print("Extracted metadata information")
-            except Exception as e:
-                print(f"Error parsing metadata: {str(e)}")
-        
-        # Slope and aspect - could be derived from DEM if available
-        # For now, using random values
         self.slope = np.random.uniform(0, 30, (self.rows, self.cols))  # 0-30 degree slopes
         self.aspect = np.random.uniform(0, 360, (self.rows, self.cols))  # 0-360 degree aspects
         
-        # Elevation - random for demonstration
         self.elevation = np.random.uniform(100, 1000, (self.rows, self.cols))  # 100-1000m elevation
         
-        # Humidity - random for demonstration
         self.humidity = np.random.uniform(20, 80, (self.rows, self.cols))  # 20-80% humidity
         
-        # Set default wind parameters if not available in metadata
-        if not hasattr(self, 'wind_speed') or self.wind_speed == 0:
-            self.wind_speed = 5.0  # Default 5 m/s
-        if not hasattr(self, 'wind_direction') or self.wind_direction == 0:
-            self.wind_direction = 225.0  # Default SW wind
-        
-        # Determine initial fire locations
-        if ignition_date:
-            # If ignition date is known, we could try to find a hotspot or use fire perimeter
-            # For now, just place it in the center of the actual burned area
-            if self.actual_burned_area is not None:
-                burned_cells = np.where(self.actual_burned_area == 1)
-                if len(burned_cells[0]) > 0:
-                    # Use the centroid of the burned area
-                    center_y = int(np.mean(burned_cells[0]))
-                    center_x = int(np.mean(burned_cells[1]))
-                    initial_fire = [(center_y, center_x)]
-                    print(f"Setting initial fire at estimated ignition point: {initial_fire}")
-                    self.set_initial_fire(initial_fire)
-                else:
-                    print("No burned cells found in actual burn area")
-                    return False
-            else:
-                print("No actual burned area data available")
-                return False
-        else:
-            wind_rad = np.radians(self.wind_direction)
-            start_y = self.rows // 2
-            start_x = self.cols // 2
-            
-            # Adjust starting point to be upwind
-            offset_y = int(-10 * np.cos(wind_rad))  # Negative because y increases downward
-            offset_x = int(-10 * np.sin(wind_rad))
-            
-            start_y = max(0, min(self.rows - 1, start_y + offset_y))
-            start_x = max(0, min(self.cols - 1, start_x + offset_x))
-            
-            initial_fire = [(start_y, start_x)]
-            print(f"Setting initial fire at estimated upwind point: {initial_fire}")
-            self.set_initial_fire(initial_fire)
-        
-        print("Grid initialization from MTBS data complete")
         return True
     
     def run_simulation(self, steps):
