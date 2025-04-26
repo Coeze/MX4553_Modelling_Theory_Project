@@ -503,7 +503,7 @@ class CA:
         dnbr_data = self.load_raster_data(dnbr_path, grid_size)
         print(f"Loaded DNBR raster: {dnbr_path}")
     
-    def overlay_simulation_with_actual(self, figsize=(15, 8)):
+    def overlay_simulation_with_actual(self, fire, figsize=(15, 8)):
         """
         Create a side-by-side visualization comparing simulated vs actual burn area
         
@@ -552,36 +552,34 @@ class CA:
         cbar = plt.colorbar(im, ax=axs[2], ticks=[0, 1, 2, 3])
         cbar.set_label('Comparison')
         cbar.set_ticklabels(['Unburned (Correct)', 'Missed (False Neg)', 'Overestimated (False Pos)', 'Burned (Correct)'])
+        if fire == "arizona":
+            burn_bndy_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
+            dnbr_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
+        elif fire == "alabama":
+            burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
+            dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
         
         # NEW: Create overlay visualization with simulated burn on actual shapefile
         try:
-            # Get the burn perimeter shapefile
-            burn_bndy_files = [f for f in os.listdir(os.path.dirname(self.actual_burn_path)) if f.endswith('burn_bndy.shp')]
-            if burn_bndy_files:
-                burn_bndy_path = os.path.join(os.path.dirname(self.actual_burn_path), burn_bndy_files[0])
-                burn_gdf = gpd.read_file(burn_bndy_path)
+            burn_gdf = gpd.read_file(burn_bndy_path)
+            
+            # Plot the actual shapefile
+            burn_gdf.plot(ax=axs[3], color='none', edgecolor='red', linewidth=2)
+            
+            # Create a transparent overlay of the simulated burned area
+            alpha_sim = np.zeros((self.rows, self.cols, 4))
+            # Set RGBA for simulated burned areas (black with 60% opacity)
+            alpha_sim[simulated_burned == 1, :] = [0, 0, 0, 0.6]
+            
+            # Plot the simulated burned area on top of the shapefile
+            axs[3].imshow(alpha_sim, origin='upper')
+            axs[3].set_title('Simulated Grid Overlay on Shapefile')
                 
-                # Plot the actual shapefile
-                burn_gdf.plot(ax=axs[3], color='none', edgecolor='red', linewidth=2)
+            # Add a scale bar if transform is available
+            if self.transform:
+                scale_bar = ScaleBar(self.cell_size, units="m", location="lower right")
+                axs[3].add_artist(scale_bar)
                 
-                # Create a transparent overlay of the simulated burned area
-                alpha_sim = np.zeros((self.rows, self.cols, 4))
-                # Set RGBA for simulated burned areas (black with 60% opacity)
-                alpha_sim[simulated_burned == 1, :] = [0, 0, 0, 0.6]
-                
-                # Plot the simulated burned area on top of the shapefile
-                axs[3].imshow(alpha_sim, origin='upper')
-                axs[3].set_title('Simulated Grid Overlay on Shapefile')
-                
-                # Add a scale bar if transform is available
-                if self.transform:
-                    scale_bar = ScaleBar(self.cell_size, units="m", location="lower right")
-                    axs[3].add_artist(scale_bar)
-                
-            else:
-                axs[3].text(0.5, 0.5, "Shapefile not available for overlay", 
-                          horizontalalignment='center', verticalalignment='center',
-                          transform=axs[3].transAxes)
         except Exception as e:
             axs[3].text(0.5, 0.5, f"Error creating overlay: {str(e)}", 
                       horizontalalignment='center', verticalalignment='center',
