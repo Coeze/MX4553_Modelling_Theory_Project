@@ -124,23 +124,6 @@ class CA:
         for row, col in fire_points:
             if 0 <= row < self.rows and 0 <= col < self.cols:
                 self.grid[row, col] = 1
-
-
-    def extract_features(self):
-        """
-        Extract features for all cells in the grid
-        
-        Returns:
-        - features: 2D numpy array of shape (rows*cols, num_features)
-        """
-        features = np.column_stack([
-            self.slope.ravel(),
-            self.aspect.ravel(),
-            self.elevation.ravel(),
-            self.humidity.ravel(),
-            self.ndvi.ravel()
-        ])
-        return features
     
     
     def wind_effect(self, c1, c2):
