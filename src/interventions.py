@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.ndimage import convolve
 
 from src.model import CA
 
@@ -77,122 +78,7 @@ def apply_direct_attack_strategy(model, steps):
     
     return history
 
-def apply_indirect_attack_strategy(model, steps):
-    """
-    Apply an indirect attack strategy creating control lines ahead of the fire
-    
-    Parameters:
-    - model: CA model
-    - steps: number of simulation steps
-    
-    Returns:
-    - history: list of grid states at each time step
-    """
-    # Let fire establish for a few steps
-    history = model.run_simulation(2)
-    
-    # Calculate expected fire direction based on wind
-    wind_direction_rad = np.radians(model.wind_direction)
-    dx = int(round(5 * np.sin(wind_direction_rad)))  # Offset distance in x
-    dy = int(round(-5 * np.cos(wind_direction_rad)))  # Offset distance in y (negative because y-axis is inverted)
-    
-    # Find the current fire front
-    burning_cells = np.where(model.grid == 1)
-    
-    if len(burning_cells[0]) > 0:
-        # Calculate the fire centroid
-        centroid_y = int(np.mean(burning_cells[0]))
-        centroid_x = int(np.mean(burning_cells[1]))
-        
-        # Create an indirect attack line ahead of the fire
-        # Perpendicular to the wind direction
-        perp_rad = wind_direction_rad + np.pi/2
-        
-        for d in range(-25, 26):  # Line width of 51 cells
-            # Calculate position along the perpendicular line
-            x = centroid_x + dx + int(round(d * np.cos(perp_rad)))
-            y = centroid_y + dy + int(round(d * np.sin(perp_rad)))
-            
-            # Create a wider indirect line
-            for w in range(3):
-                attack_x = x + w
-                attack_y = y
-                
-                if 0 <= attack_y < model.rows and 0 <= attack_x < model.cols:
-                    # Create fuel break (wet line)
-                    model.humidity[attack_y, attack_x] = 95
-                    model.ndvi[attack_y, attack_x] = 0.05
-    
-    # Continue the simulation
-    for step in range(steps - 2):
-        model.update()
-        history.append(np.copy(model.grid))
-        
-        # Stop if no more burning cells
-        if not np.any(model.grid == 1):
-            break
-    
-    return history
 
-def apply_combined_attack_strategy(model, steps):
-    """
-    Apply a combined direct and indirect attack strategy
-    
-    Parameters:
-    - model: CA model
-    - steps: number of simulation steps
-    
-    Returns:
-    - history: list of grid states at each time step
-    """
-    # Setup - first let fire establish slightly
-    history = model.run_simulation(2)
-    
-    # Calculate expected fire direction based on wind
-    wind_direction_rad = np.radians(model.wind_direction)
-    dx = int(round(8 * np.sin(wind_direction_rad)))
-    dy = int(round(-8 * np.cos(wind_direction_rad)))
-    
-    # For each remaining step
-    for step in range(steps - 2):
-        # Direct attack on fire perimeter
-        burning_cells = np.where(model.grid == 1)
-        resources_capacity = min(len(burning_cells[0]), 8)  # Fewer direct resources due to split
-        
-        if resources_capacity > 0:
-            indices = np.random.choice(len(burning_cells[0]), resources_capacity, replace=False)
-            for idx in indices:
-                row, col = burning_cells[0][idx], burning_cells[1][idx]
-                if np.random.random() < 0.6:  # Lower success rate due to split resources
-                    model.grid[row, col] = 2  # Extinguish
-        
-        # Indirect attack ahead of fire front
-        if len(burning_cells[0]) > 0:
-            # Calculate the fire centroid
-            centroid_y = int(np.mean(burning_cells[0]))
-            centroid_x = int(np.mean(burning_cells[1]))
-            
-            # Create an indirect line perpendicular to wind direction
-            perp_rad = wind_direction_rad + np.pi/2
-            
-            for d in range(-20, 21):  # Smaller line due to split resources
-                x = centroid_x + dx + int(round(d * np.cos(perp_rad)))
-                y = centroid_y + dy + int(round(d * np.sin(perp_rad)))
-                
-                if 0 <= y < model.rows and 0 <= x < model.cols:
-                    # Create fuel break
-                    model.humidity[y, x] = 90
-                    model.ndvi[y, x] = 0.1
-        
-        # Update the model for this step
-        model.update()
-        history.append(np.copy(model.grid))
-        
-        # Stop if no more burning cells
-        if not np.any(model.grid == 1):
-            break
-    
-    return history
 
 def apply_aerial_attack_strategy(model, steps):
     """
@@ -357,7 +243,6 @@ def apply_wet_line_strategy(model, steps):
     kernel = np.ones((3, 3))
     kernel[1, 1] = 0  # Remove center
     
-    from scipy.ndimage import convolve
     perimeter_with_buffer = convolve(grid_with_buffer, kernel) * (1 - grid_with_buffer) > 0
     perimeter = perimeter_with_buffer[1:-1, 1:-1]
     
