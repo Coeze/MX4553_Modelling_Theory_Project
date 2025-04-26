@@ -54,7 +54,6 @@ class CA:
         self.slope = np.zeros(grid_size)
         self.aspect = np.zeros(grid_size)
         self.elevation = np.zeros(grid_size)
-        self.humidity = np.zeros(grid_size)
         self.ndvi = np.zeros(grid_size)
         self.fuel_type = np.zeros(grid_size)  # veg/fuel type for each cell
 
@@ -74,7 +73,7 @@ class CA:
         self.wind_direction = 0  # in degrees
         self.temperature = 80
         self.precipitation = 0.0
-        self.humidity = 0.0
+        self.humidity = 5
         
         # Geospatial parameters for raster alignment
         self.transform = None
@@ -118,6 +117,7 @@ class CA:
         self.wind_speed = wind_speed
         self.wind_direction = wind_direction
         self.temperature = temperature
+        self.humidity = humidity
     
     
     def set_initial_fire(self, fire_points):
@@ -208,7 +208,7 @@ class CA:
 
         wind_effects = self.wind_effect(self.c1, self.c2)
         topography_effects = self.topography_effect(self.slope[row, col])
-        humidity_effects = self.humidity_effect(self.humidity[row, col])
+        humidity_effects = self.humidity_effect(self.humidity)
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
