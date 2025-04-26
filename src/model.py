@@ -440,12 +440,7 @@ class CA:
             cell_size = self.cell_size
             
         rows, cols = grid_size
-        
-  
-        # import numpy as np
-
-        shapefile_path = 'az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
-
+    
         # Open the shapefile
         with fiona.open(shapefile_path, 'r') as shapefile:
             # Get the bounds of the shapefile
