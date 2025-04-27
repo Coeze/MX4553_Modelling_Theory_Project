@@ -214,7 +214,7 @@ class CA:
         p_density = self.ndvi[row, col] * 0.5 + 0.5
 
         adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) / ((humidity_effects) * (precipitation_effect))
-        print(f" prob: {probability}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
+        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
