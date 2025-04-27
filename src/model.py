@@ -161,10 +161,7 @@ class CA:
         Adjust fire spread probability based on humidity.
         """
         humidity_factor = np.exp((abs(h)) * humidity)
-        return humidity_factor
-
-    def sigmoid(self, x):
-        return 1 / (1 + math.exp(-x))
+        return 1/humidity_factor
     
     def temperature_effect(self, temperature, t=0.0194):
         """
@@ -177,7 +174,7 @@ class CA:
         Adjust fire spread probability based on precipitation.
         """   
         precipitation_factor = np.exp((abs(p)) * precipitation)
-        return precipitation_factor
+        return 1/precipitation_factor
     
     def calculate_ignition_probability(self, row, col):
         """
@@ -220,7 +217,7 @@ class CA:
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
 
-        adjusted_probability = (self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects * temperature_effects)/(humidity_effects * precipitation_effect)
+        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects * temperature_effects * humidity_effects * precipitation_effect
         # print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
