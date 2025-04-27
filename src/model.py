@@ -240,11 +240,11 @@ class CA:
                     if np.random.random() < p_ignite:
                         self.next_grid[row, col] = 1  # Cell ignites
                 
-                # elif self.grid[row, col] == 1:  # Burning cell
-                #     # Cells burn for one time step, then become burnt
-                #     self.next_grid[row, col] = 2
+                elif self.grid[row, col] == 1:  # Burning cell
+                    # Cells burn for one time step, then become burnt
+                    self.next_grid[row, col] = 2
         
-        # Update grid
+        Update grid
         self.grid = np.copy(self.next_grid)
     
     def initialise_ndvi_from_data(self, fire):
