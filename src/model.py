@@ -238,7 +238,6 @@ class CA:
                     # Cells burn for one time step, then become burnt
                     self.next_grid[row, col] = 2
         
-        Update grid
         self.grid = np.copy(self.next_grid)
     
     def initialise_ndvi_from_data(self, fire):
