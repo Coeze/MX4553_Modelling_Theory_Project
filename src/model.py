@@ -152,7 +152,7 @@ class CA:
         """
         Adjust fire spread probability based on terrain slope.
         """
-        slope_factor = np.exp((3.533 * (np.tan(slope))))
+        slope_factor = np.exp((3.533 * (np.tan(slope)) * 1.2))
         return slope_factor
 
 
