@@ -206,6 +206,7 @@ class CA:
                 nr, nc = row + dr, col + dc
                 if 0 <= nr < self.rows and 0 <= nc < self.cols and self.grid[nr, nc] == 1:
                     highest_veg_prob = max(highest_veg_prob, self.fuel_model[self.fuel_type[nr, nc], self.fuel_type[row, col]])
+                    print(f'highest beg porb: {highest_veg_prob}')
                     has_burning_neighbors = True
         if not has_burning_neighbors:
             return 0.0
@@ -218,8 +219,8 @@ class CA:
         p_density = self.ndvi[row, col] * 0.5 + 0.5
          # * temperature_effects * humidity_effects * precipitation_effect
         adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects
-        # print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
-        print(adjusted_probability)
+        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
+        # print(adjusted_probability)
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
     
