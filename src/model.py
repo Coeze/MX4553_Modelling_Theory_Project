@@ -134,7 +134,7 @@ class CA:
                 self.grid[row, col] = 1
     
     
-    def wind_effect(self, c1, c2):
+        def wind_effect(self, c1, c2):
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
@@ -170,7 +170,7 @@ class CA:
         return precipitation_factor
 
     
-    def calculate_ignition_probability(self, row, col, params=None):
+    def calculate_ignition_probability(self, row, col):
         """
         Calculate the probability of a cell igniting using LSSVM
         As described in Section 2.3 of the paper
@@ -181,12 +181,6 @@ class CA:
         Returns:
         - probability: ignition probability [0, 1]
         """
-        #Model Constants
-        self.c1 = params['c1'] if params else 0.5
-        self.c2 = params['c2'] if params else 0.5
-        self.p0 = params['p0'] if params else 0.5
-        
-        
         if not (0 <= row < self.rows and 0 <= col < self.cols):
             return 0.0
         
@@ -210,21 +204,21 @@ class CA:
         
         if not has_burning_neighbors:
             return 0.0
-        
 
-        wind_effects = self.wind_effect(self.c1, self.c2)
+
+        wind_effects = self.wind_effect(0.5, 0.5)
         topography_effects = self.topography_effect(self.slope[row, col])
-        humidity_effects = self.humidity_effect(self.humidity)
+        humidity_effects = self.humidity_effect(humidity=self.humidity)
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-        # / ((humidity_effects) * (precipitation_effect))
-        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) 
-        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
+
+        adjusted_probability = probability * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) / ((humidity_effects) * (precipitation_effect))
+        print(f" prob: {probability}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
-    
+        
     def update(self):
         """
         Update the CA grid for one time step
