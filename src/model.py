@@ -205,18 +205,7 @@ class CA:
         if not has_burning_neighbors:
             return 0.0
         
-        # Extract features for the current cell
-        features = np.array([
-            self.slope[row, col],
-            self.aspect[row, col],
-            self.elevation[row, col],
-            self.humidity[row, col],
-            self.ndvi[row, col]
-        ]).reshape(1, -1)
-        
-        # Get the probability of fire using the LSSVM classifier
-        probability = self.classifier.predict_proba(features)[0][1]
-
+      
         wind_effects = self.wind_effect(0.5, 0.5)
         topography_effects = self.topography_effect(self.slope[row, col])
         humidity_effects = self.humidity_effect(humidity=6)
