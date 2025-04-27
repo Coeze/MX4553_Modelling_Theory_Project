@@ -17,7 +17,6 @@ def apply_firebreak_strategy(model, steps):
     """
     # Create firebreaks (set fuel-related values to very low)
     # Create two strategic firebreak lines
-    
     # Horizontal firebreak
     y_pos = 40
     for x in range(0, 100):
@@ -78,89 +77,6 @@ def apply_direct_attack_strategy(model, steps):
     
     return history
 
-
-
-# def apply_burnout_strategy(model, steps):
-#     """
-#     Apply a burnout strategy with controlled burns between control lines and the fire
-    
-#     Parameters:
-#     - model: CA model
-#     - steps: number of simulation steps
-    
-#     Returns:
-#     - history: list of grid states at each time step
-#     """
-#     # Let fire establish
-#     history = model.run_simulation(2)
-    
-#     # Calculate expected fire direction based on wind
-#     wind_direction_rad = np.radians(model.wind_direction)
-    
-#     # Find the fire
-#     burning_cells = np.where(model.grid == 1)
-    
-#     if len(burning_cells[0]) > 0:
-#         # Calculate fire centroid
-#         centroid_y = int(np.mean(burning_cells[0]))
-#         centroid_x = int(np.mean(burning_cells[1]))
-        
-#         # Create a control line ahead of the fire
-#         dx = int(round(15 * np.sin(wind_direction_rad)))
-#         dy = int(round(-15 * np.cos(wind_direction_rad)))
-        
-#         # Perpendicular to wind direction for the control line
-#         perp_rad = wind_direction_rad + np.pi/2
-        
-#         # Create control line
-#         for d in range(-25, 26):
-#             x = centroid_x + dx + int(round(d * np.cos(perp_rad)))
-#             y = centroid_y + dy + int(round(d * np.sin(perp_rad)))
-            
-#             for w in range(3):
-#                 line_x = x + w
-#                 line_y = y
-                
-#                 if 0 <= line_y < model.rows and 0 <= line_x < model.cols:
-#                     # Create fuel break
-#                     model.humidity[line_y, line_x] = 95
-#                     model.ndvi[line_y, line_x] = 0.0  # No fuel
-        
-#         # Create a burnout zone (mark as already burnt) between the control line and the fire
-#         for y in range(model.rows):
-#             for x in range(model.cols):
-#                 # Check if point is between fire and control line
-#                 vector_to_point = (x - centroid_x, y - centroid_y)
-#                 distance = np.sqrt(vector_to_point[0]**2 + vector_to_point[1]**2)
-                
-#                 # Skip if too far away
-#                 if distance > 25:
-#                     continue
-                
-#                 # Calculate angle to point
-#                 angle = np.arctan2(vector_to_point[1], vector_to_point[0])
-                
-#                 # Normalize angle difference
-#                 angle_diff = abs(angle - wind_direction_rad)
-#                 if angle_diff > np.pi:
-#                     angle_diff = 2 * np.pi - angle_diff
-                
-#                 # Check if in the forward direction of the fire
-#                 if angle_diff < np.pi/2 and 5 < distance < 15:
-#                     # Mark as burnt (controlled burn area)
-#                     if model.grid[y, x] == 0:  # Only if not already burning or burnt
-#                         model.grid[y, x] = 2
-    
-#     # Continue simulation
-#     for step in range(steps - 2):
-#         model.update()
-#         history.append(np.copy(model.grid))
-        
-#         # Stop if no more burning cells
-#         if not np.any(model.grid == 1):
-#             break
-    
-#     return history
 
 def apply_point_protection_strategy(model, steps):
     """
