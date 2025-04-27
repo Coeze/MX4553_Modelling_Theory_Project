@@ -134,7 +134,7 @@ class CA:
                 self.grid[row, col] = 1
     
     
-        def wind_effect(self, c1, c2):
+    def wind_effect(self, c1, c2):
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
