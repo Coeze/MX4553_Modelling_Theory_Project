@@ -138,21 +138,14 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        angle_diff = np.abs(self.fire_direction - self.wind_direction)
-        # Convert to radians and calculate cosine
-        angle_cos = np.cos(np.radians(angle_diff))
-        
-        # Apply the exponential wind effect formula
-        wind_factor = np.exp(self.wind_speed * 0.1783)
-
+        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(self.wind_direction)) - 1)))
         return wind_factor
 
-
-    def topography_effect(self, slope, aspect):
+    def topography_effect(self, slope):
         """
         Adjust fire spread probability based on terrain slope.
         """
-        slope_factor = np.exp((3.533 * (np.tan(slope)) * 1.2))
+        slope_factor = np.exp((3.533 * (np.tan(slope))))
         return slope_factor
 
 
@@ -161,8 +154,8 @@ class CA:
         Adjust fire spread probability based on humidity.
         """
         humidity_factor = np.exp((abs(h)) * humidity)
-        return 1/humidity_factor
-    
+        return humidity_factor
+
     def temperature_effect(self, temperature, t=0.0194):
         """
         Adjust fire spread probability based on temperature.
@@ -174,9 +167,10 @@ class CA:
         Adjust fire spread probability based on precipitation.
         """   
         precipitation_factor = np.exp((abs(p)) * precipitation)
-        return 1/precipitation_factor
+        return precipitation_factor
+
     
-    def calculate_ignition_probability(self, row, col):
+    def calculate_ignition_probability(self, row, col, params=None):
         """
         Calculate the probability of a cell igniting using LSSVM
         As described in Section 2.3 of the paper
@@ -187,6 +181,10 @@ class CA:
         Returns:
         - probability: ignition probability [0, 1]
         """
+        #Model Constants
+        self.c1 = params['c1'] if params else 0.5
+        self.c2 = params['c2'] if params else 0.5
+        self.p0 = params['p0'] if params else 0.5
         
         
         if not (0 <= row < self.rows and 0 <= col < self.cols):
@@ -207,19 +205,31 @@ class CA:
                 if 0 <= nr < self.rows and 0 <= nc < self.cols and self.grid[nr, nc] == 1:
                     highest_veg_prob = max(highest_veg_prob, self.fuel_model[self.fuel_type[nr, nc], self.fuel_type[row, col]])
                     has_burning_neighbors = True
+            if has_burning_neighbors:
+                break
+        
         if not has_burning_neighbors:
             return 0.0
+        
+        # Extract features for the current cell
+        features = np.array([
+            self.slope[row, col],
+            self.aspect[row, col],
+            self.elevation[row, col],
+            self.humidity[row, col],
+            self.ndvi[row, col]
+        ]).reshape(1, -1)
 
         wind_effects = self.wind_effect(self.c1, self.c2)
-        topography_effects = self.topography_effect(self.slope[row, col], self.aspect[row,col])
-        humidity_effects = self.humidity_effect(self.humidity)
+        topography_effects = self.topography_effect(self.slope[row, col])
+        humidity_effects = self.humidity_effect(self.humidity[row, col])
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-         # 
-        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects * temperature_effects * humidity_effects * precipitation_effect
-        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {topography_effects}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
-        # print(adjusted_probability)
+        # / ((humidity_effects) * (precipitation_effect))
+        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) 
+        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
+        
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
     
