@@ -497,11 +497,11 @@ class CA:
         if folder_path == "arizona":
             burn_bndy_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_burn_bndy.shp'
             dnbr_path = 'data/az3698311211020200729/az3698311211020200729_20200714_20210717_dnbr.tif'
-            self.set_initial_fire([(50, 50)])
+            self.set_initial_fire([(self.rows*.5, self.cols*.5)])
         elif folder_path == "alabama":
             burn_bndy_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_burn_bndy.shp'
             dnbr_path = 'data/al3039808817220190514/al3039808817220190514_20190513_20190528_dnbr.tif'
-            self.set_initial_fire([(25, 25)])
+            self.set_initial_fire([(self.rows*0.75, self.cols*0.25)])
         else:
             raise ValueError('Please select a valid fire either: alabama or arizona')
 
