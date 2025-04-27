@@ -133,7 +133,7 @@ class CA:
             if 0 <= row < self.rows and 0 <= col < self.cols:
                 self.grid[row, col] = 1
 
-    def sigmoid(x):
+    def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
     
     def wind_effect(self, c1, c2):
