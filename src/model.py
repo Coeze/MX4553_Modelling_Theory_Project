@@ -429,7 +429,8 @@ class CA:
             geometries = [feature["geometry"] for feature in shapefile]
 
         # Define the dimensions of the output array
-        height = width = 100
+        height = self.rows 
+        width = self.cols
 
         # Calculate the resolution of each pixel
         x_res = (bounds[2] - bounds[0]) / width
