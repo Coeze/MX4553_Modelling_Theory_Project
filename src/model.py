@@ -217,8 +217,8 @@ class CA:
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-         # * humidity_effects * precipitation_effect
-        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects * temperature_effects
+         # 
+        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects * temperature_effects * humidity_effects * precipitation_effect
         print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {topography_effects}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         # print(adjusted_probability)
         # Ensure probability is in [0, 1] range
