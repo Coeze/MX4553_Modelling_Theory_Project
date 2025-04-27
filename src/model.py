@@ -143,7 +143,7 @@ class CA:
         angle_cos = np.cos(np.radians(angle_diff))
         
         # Apply the exponential wind effect formula
-        wind_factor = np.exp(self.wind_speed * (self.c1 + self.c2 * (angle_cos - 1)))
+        wind_factor = np.exp(self.wind_speed * 0.1783)
 
         return wind_factor
 
@@ -152,7 +152,7 @@ class CA:
         """
         Adjust fire spread probability based on terrain slope.
         """
-        slope_factor = np.exp((3.533 * (np.tan(slope)) * np.sin(aspect)))
+        slope_factor = np.exp((3.533 * (np.tan(slope))))
         return slope_factor
 
 
