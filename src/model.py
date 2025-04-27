@@ -138,7 +138,7 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(np.abs(self.fire_direction-self.wind_direction))) - 1)))
+        wind_factor = np.exp(self.wind_speed * 0.1783)
         return wind_factor
 
     def topography_effect(self, slope):
