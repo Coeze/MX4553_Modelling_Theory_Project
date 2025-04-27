@@ -22,15 +22,15 @@ def apply_firebreak_strategy(model, steps):
     y_pos = 40
     for x in range(0, 100):
         for y in range(y_pos, min(y_pos + 3, 100)):
-            model.ndvi[y, x] = 0.05  # Very low vegetation
-            model.humidity[y, x] = 90  # Very high humidity
+            model.ndvi[y, x] = 0.05  # reduce vegetable density
+            model.fuel_type[y, x] = 5  # Change fuel type to not fire prone forest
     
     # Vertical firebreak
     x_pos = 60
     for y in range(0, 100):
         for x in range(x_pos, min(x_pos + 3, 100)):
-            model.ndvi[y, x] = 0.05
-            model.humidity[y, x] = 90
+            model.ndvi[y, x] = 0.05 # reduce vegetable density
+            model.fuel_type[y, x] = 5  # Change fuel type to not fire prone forest
     
     # Run the simulation
     return model.run_simulation(steps)
