@@ -325,9 +325,9 @@ class CA:
             self.update()
             history.append(np.copy(self.grid))
             
-            # Stop if no more burning cells
-            if not np.any(self.grid == 1):
-                break
+            # # Stop if no more burning cells
+            # if not np.any(self.grid == 1):
+            #     break
         
         return history
     
