@@ -140,7 +140,7 @@ class CA:
         Calculate the wind effect factor based on wind speed and direction.
         """
         # wind_factor = np.exp(self.wind_speed * 0.1783)
-        # diff = np.abs(self.wind_direction - self.fire_direction)
+        diff = np.abs(self.wind_direction - self.fire_direction)
         wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(diff)) - 1)))
         return self.sigmoid(wind_factor)
 
