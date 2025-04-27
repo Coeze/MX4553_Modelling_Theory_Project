@@ -16,7 +16,7 @@ import rasterio
 from rasterio.features import rasterize
 from rasterio.transform import from_origin
 import os
-from pyproj import CRS, Transformerf
+from pyproj import CRS, Transformer
 from shapely.geometry import box, mapping
 import random
 from deap import base, creator, tools, algorithms
