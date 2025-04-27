@@ -138,7 +138,7 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(self.wind_direction)) - 1)))
+        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(np.abs(self.fire_direction-self.wind_direction))) - 1)))
         return wind_factor
 
     def topography_effect(self, slope):
@@ -162,6 +162,7 @@ class CA:
         """   
         temperature_factor = np.exp(t * temperature)
         return (temperature_factor)
+        
     def precipitation_effect(self, precipitation, p=-0.3473):
         """
         Adjust fire spread probability based on precipitation.
