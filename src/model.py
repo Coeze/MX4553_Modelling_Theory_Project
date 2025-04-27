@@ -138,7 +138,9 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        wind_factor = np.exp(self.wind_speed * 0.1783)
+        # wind_factor = np.exp(self.wind_speed * 0.1783)
+        diff = np.abs(self.wind_direction - self.fire_direction)
+        wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(diff)))))
         return wind_factor
 
     def topography_effect(self, slope):
@@ -213,8 +215,8 @@ class CA:
         temperature_effects = self.temperature_effect(temperature=self.temperature)
         precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
-
-        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) / ((humidity_effects) * (precipitation_effect))
+        #  * (temperature_effects) / ((humidity_effects) * (precipitation_effect))
+        adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects)
         print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
         
         # Ensure probability is in [0, 1] range
