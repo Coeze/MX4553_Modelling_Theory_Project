@@ -138,12 +138,12 @@ class CA:
         """
         Calculate the wind effect factor based on wind speed and direction.
         """
-        angle_diff = self.fire_direction - self.wind_direction
+        angle_diff = np.abs(self.fire_direction - self.wind_direction)
         # Convert to radians and calculate cosine
         angle_cos = np.cos(np.radians(angle_diff))
         
         # Apply the exponential wind effect formula
-        wind_factor = np.exp(self.wind_speed * (self.c1 + self.c2 * (angle_cos)))
+        wind_factor = np.exp(self.wind_speed * (self.c1 + self.c2 * (angle_cos - 1)))
 
         return wind_factor
 
