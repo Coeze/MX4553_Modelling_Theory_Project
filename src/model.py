@@ -233,16 +233,14 @@ class CA:
             for col in range(self.cols):
                 if self.grid[row, col] == 0:  # Unburnt cell
                     # Calculate ignition probability
-                    p_ignite = self.calculate_ignition_probability(row, col)
-                    print(p_ignite)
-                    
+                    p_ignite = self.calculate_ignition_probability(row, col)                    
                     # Probabilistic ignition
                     if np.random.random() < p_ignite:
                         self.next_grid[row, col] = 1  # Cell ignites
                 
-                elif self.grid[row, col] == 1:  # Burning cell
-                    # Cells burn for one time step, then become burnt
-                    self.next_grid[row, col] = 2
+                # elif self.grid[row, col] == 1:  # Burning cell
+                #     # Cells burn for one time step, then become burnt
+                #     self.next_grid[row, col] = 2
         
         # Update grid
         self.grid = np.copy(self.next_grid)
