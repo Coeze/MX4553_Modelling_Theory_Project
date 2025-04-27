@@ -208,9 +208,9 @@ class CA:
       
         wind_effects = self.wind_effect(0.5, 0.5)
         topography_effects = self.topography_effect(self.slope[row, col])
-        humidity_effects = self.humidity_effect(humidity=6)
+        humidity_effects = self.humidity_effect(humidity=self.humidity)
         temperature_effects = self.temperature_effect(temperature=self.temperature)
-        precipitation_effect = self.precipitation_effect(3)
+        precipitation_effect = self.precipitation_effect(self.precipitation)
         p_density = self.ndvi[row, col] * 0.5 + 0.5
 
         adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * (wind_effects) * (topography_effects) * (temperature_effects) / ((humidity_effects) * (precipitation_effect))
