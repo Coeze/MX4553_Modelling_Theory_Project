@@ -219,7 +219,7 @@ class CA:
          # * temperature_effects * humidity_effects * precipitation_effect
         adjusted_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects
         # print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, precipitation: {precipitation_effect}")
-        
+        print(adjusted_probability)
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
     
@@ -234,6 +234,7 @@ class CA:
                 if self.grid[row, col] == 0:  # Unburnt cell
                     # Calculate ignition probability
                     p_ignite = self.calculate_ignition_probability(row, col)
+                    print(p_ignite)
                     
                     # Probabilistic ignition
                     if np.random.random() < p_ignite:
@@ -325,9 +326,9 @@ class CA:
             self.update()
             history.append(np.copy(self.grid))
             
-            # # Stop if no more burning cells
-            # if not np.any(self.grid == 1):
-            #     break
+            # Stop if no more burning cells
+            if not np.any(self.grid == 1):
+                break
         
         return history
     
