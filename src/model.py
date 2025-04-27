@@ -206,7 +206,6 @@ class CA:
                 nr, nc = row + dr, col + dc
                 if 0 <= nr < self.rows and 0 <= nc < self.cols and self.grid[nr, nc] == 1:
                     highest_veg_prob = max(highest_veg_prob, self.fuel_model[self.fuel_type[nr, nc], self.fuel_type[row, col]])
-                    print(f'highest beg porb: {highest_veg_prob}')
                     has_burning_neighbors = True
         if not has_burning_neighbors:
             return 0.0
