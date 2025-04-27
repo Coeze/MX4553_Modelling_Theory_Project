@@ -65,7 +65,7 @@ def apply_direct_attack_strategy(model, steps):
                 
                 # 70% chance of successfully extinguishing a burning cell
                 if np.random.random() < 0.7:
-                    model.grid[row, col] = 2  # Directly extinguish to burnt state
+                    model.grid[row, col] = 3  # Extinguished state
         
         # Update the model for this step
         model.update()
@@ -105,8 +105,8 @@ def apply_point_protection_strategy(model, steps):
                     
                     if 0 <= y < model.rows and 0 <= x < model.cols:
                         # Apply protection (increased humidity, reduced vegetation)
-                        model.humidity[y, x] = 90
-                        model.ndvi[y, x] = 0.1
+                        model.fuel_type[y, x] = 5
+                        model.ndvi[y, x] = 0.05
     
     # Run the simulation
     history = model.run_simulation(steps)
@@ -155,7 +155,7 @@ def apply_early_detection_strategy(model, steps):
             
             # 90% chance of catching and extinguishing a fire early
             if np.random.random() < 0.9:
-                model.grid[row, col] = 2  # Extinguish to burnt state
+                model.grid[row, col] = 3  # Extinguished state
         
         # Stop if no more burning cells
         if not np.any(model.grid == 1):
