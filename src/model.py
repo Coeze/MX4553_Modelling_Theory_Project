@@ -132,7 +132,9 @@ class CA:
         for row, col in fire_points:
             if 0 <= row < self.rows and 0 <= col < self.cols:
                 self.grid[row, col] = 1
-    
+
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
     
     def wind_effect(self, c1, c2):
         """
@@ -141,35 +143,37 @@ class CA:
         wind_factor = np.exp(self.wind_speed * 0.1783)
         # diff = np.abs(self.wind_direction - self.fire_direction)
         # wind_factor = np.exp(self.wind_speed * (c1 + c2 * (np.cos(np.radians(diff)) - 1)))
-        return wind_factor
+        return sigmoid(wind_factor)
+
+    
 
     def topography_effect(self, slope):
         """
         Adjust fire spread probability based on terrain slope.
         """
         slope_factor = np.exp((3.533 * (np.tan(slope))))
-        return slope_factor
+        return sigmoid(slope_factor)
 
     def humidity_effect(self, humidity, h=0.2036):
         """
         Adjust fire spread probability based on humidity.
         """
         humidity_factor = np.exp((abs(h)) * humidity)
-        return humidity_factor
+        return sigmoid(humidity_factor)
 
     def temperature_effect(self, temperature, t=0.0194):
         """
         Adjust fire spread probability based on temperature.
         """   
         temperature_factor = np.exp(t * temperature)
-        return (temperature_factor)
+        return sigmoid(temperature_factor)
         
     def precipitation_effect(self, precipitation, p=-0.3473):
         """
         Adjust fire spread probability based on precipitation.
         """   
         precipitation_factor = np.exp((abs(p)) * precipitation)
-        return precipitation_factor
+        return sigmoid(precipitation_factor)
 
     
     def calculate_ignition_probability(self, row, col):
