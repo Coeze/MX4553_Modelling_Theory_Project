@@ -11,7 +11,7 @@ from .model import CA
 
 
 class BayesianParameterEstimation:
-    def __init__(self, fire_name, grid_size=(100, 100)):
+    def __init__(self, elevation, slope, aspect, fire_name, grid_size=(100, 100)):
         """Initialize the Bayesian parameter estimation for CA wildfire model
         
         Parameters:
@@ -53,6 +53,9 @@ class BayesianParameterEstimation:
             humidity=20.0,        # percent
             fire_direction=90.0   # degrees
         )
+
+        ca_model.load_terrain_data(slope, aspect, elevation)
+        ca_model.initialise_ndvi_from_data(fire)
         
         return ca_model
     
