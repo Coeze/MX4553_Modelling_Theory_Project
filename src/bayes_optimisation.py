@@ -400,27 +400,3 @@ class BayesianParameterEstimation:
             print(f"  {key}: {value:.4f}")
         
         return metrics
-
-# Example usage function for Google Colab
-def run_bayesian_parameter_estimation():
-    # Choose fire to analyze
-    fire_name = "arizona"  # or "alabama"
-    grid_size = (100, 100)
-    
-    # Initialize parameter estimation
-    estimator = BayesianParameterEstimation(fire_name=fire_name, grid_size=grid_size)
-    
-    # Run Sequential Monte Carlo (faster than MCMC)
-    best_params, results_df = estimator.run_sequential_monte_carlo(
-        n_particles=50,  # Number of parameter sets to evaluate in each iteration
-        steps=3,          # Number of SMC iterations
-        simulation_steps=50  # Number of time steps for each CA simulation
-    )
-    
-    # Visualize results
-    estimator.visualize_results(results_df=results_df)
-    
-    # Evaluate best parameters with longer simulation
-    estimator.evaluate_best_parameters(best_params, simulation_steps=100)
-    
-    return best_params, results_df
