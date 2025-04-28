@@ -55,10 +55,6 @@ class BayesianParameterEstimation:
             humidity=20.0,        # percent
             fire_direction=90.0   # degrees
         )
-
-# Set initial environmental conditions
-model_sde.set_environmental_data(wind_speed=25.0, wind_direction=225.0, 
-                            temperature=50, humidity=5, fire_direction=20)
         return ca_model
     
     def evaluate_model(self, params, simulation_steps=50):
