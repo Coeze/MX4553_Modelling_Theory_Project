@@ -83,6 +83,8 @@ class CA:
         self.c1 = params['c1'] if params else 0.5
         self.c2 = params['c2'] if params else 0.5
         self.p0 = params['p0'] if params else 0.5
+        self.p1 = params['p1'] if params else 0.3 # percolation fuel density
+        self.p2 = params['p2'] if params else 0.1 # percolation veg diversity factor
     
     def load_terrain_data(self, slope, aspect, elevation):
         """
@@ -717,8 +719,7 @@ class CA:
         
         In percolation theory, fire spread is modeled as a process that only occurs
         when fuel connectivity exceeds a critical threshold (pc). The threshold 
-        depends on the lattice structure - approx. 0.59 for site percolation on a 
-        square grid.
+        depends on the lattice structure.
         
         Parameters:
         - row, col: coordinates of the cell
@@ -748,13 +749,11 @@ class CA:
         # The basic threshold is ~0.59, modified by fuel properties
         base_threshold = 0.59
         # Adjust threshold: denser fuels reduce threshold, diversity increases it
-        pc = base_threshold - (0.3 * fuel_density) + (0.1 * diversity_factor)
+        pc = base_threshold - (self.p1 * fuel_density) + (self.p2 * diversity_factor)
         
         # Calculate actual site occupation probability based on NDVI and fuel type
         p_occupation = fuel_density
         
-        # In heterogeneous landscapes, we can consider a percolation probability
-        # that accounts for both fuel connectivity and local environmental factors
         effective_p = p_occupation * self.wind_effect(self.c1, self.c2) * self.topography_effect(self.slope[row, col])
         
         # Determine if the site exceeds percolation threshold
