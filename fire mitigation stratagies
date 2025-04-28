@@ -1,0 +1,148 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import convolve2d
+
+# Cell states
+EMPTY, TREE, BURNING, BURNED = 0, 1, 2, 3
+
+class WildfireSimulator:
+    def __init__(self, size, p_tree=0.6, spread_prob=0.3):
+        """
+        size: (rows, cols) of the grid
+        p_tree: initial probability of a cell containing a tree
+        spread_prob: probability that a burning cell ignites a neighboring tree
+        """
+        self.rows, self.cols = size
+        self.spread_prob = spread_prob
+        self.reset(p_tree)
+
+    def reset(self, p_tree=0.6):
+        """Initialize terrain and state arrays."""
+        # 0 = empty, 1 = tree
+        self.fuel = (np.random.rand(self.rows, self.cols) < p_tree).astype(int)
+        # 2 = burning, 3 = burned
+        self.state = np.where(self.fuel == TREE, TREE, EMPTY)
+        self.time = 0
+        self.history = []
+
+    def ignite(self, locations):
+        """Set initial burning cells: locations is list of (i,j) tuples."""
+        for i, j in locations:
+            if self.state[i,j] == TREE:
+                self.state[i,j] = BURNING
+
+    def step(self):
+        """Advance one time step."""
+        new_state = self.state.copy()
+        # kernel to count burning neighbors (8‐connectivity)
+        kernel = np.ones((3,3), dtype=int)
+        burning_mask = (self.state == BURNING).astype(int)
+        n_burning_neighbors = convolve2d(burning_mask, kernel, mode='same', boundary='fill', fillvalue=0)
+        # Trees catch fire if at least one burning neighbor AND random < spread_prob
+        catch_fire = ((self.state == TREE) &
+                      (n_burning_neighbors > 0) &
+                      (np.random.rand(self.rows, self.cols) < 
+                       (1 - (1 - self.spread_prob)**n_burning_neighbors)))
+        new_state[catch_fire] = BURNING
+        # Burning cells become burned
+        new_state[self.state == BURNING] = BURNED
+        self.state = new_state
+        self.time += 1
+        self.history.append(self.state.copy())
+
+    def run(self, max_steps=200):
+        """Simulate until fire dies out or max_steps reached."""
+        while np.any(self.state == BURNING) and self.time < max_steps:
+            self.step()
+        return self.time
+
+    def burned_fraction(self):
+        """Return fraction of initial trees that ended up burned."""
+        total_trees = np.sum(self.fuel == TREE)
+        burned_trees = np.sum(self.state == BURNED)
+        return burned_trees / total_trees
+
+    # --- Mitigation strategies ---
+    def apply_gap(self, orientation='horizontal', width=3, position=None):
+        """
+        Create a fuel break.
+        orientation: 'horizontal' or 'vertical'
+        width: thickness of the gap
+        position: row or col index for center of gap (default: middle)
+        """
+        if position is None:
+            position = (self.rows // 2) if orientation=='horizontal' else (self.cols // 2)
+        if orientation == 'horizontal':
+            r0 = max(0, position - width//2)
+            r1 = min(self.rows, position + width//2 + 1)
+            self.state[r0:r1, :] = EMPTY
+            self.fuel[r0:r1, :] = EMPTY
+        else:
+            c0 = max(0, position - width//2)
+            c1 = min(self.cols, position + width//2 + 1)
+            self.state[:, c0:c1] = EMPTY
+            self.fuel[:, c0:c1] = EMPTY
+
+    def apply_nuke(self, center, radius):
+        """
+        “Nuclear bomb”: clear everything in a circle of given radius around center.
+        center: (i,j)
+        radius: integer
+        """
+        Ci, Cj = center
+        Y, X = np.ogrid[:self.rows, :self.cols]
+        mask = (Y - Ci)**2 + (X - Cj)**2 <= radius**2
+        self.state[mask] = EMPTY
+        self.fuel[mask] = EMPTY
+
+    def apply_controlled_burn(self, area):
+        """
+        Start a small fire to consume fuel in advance.
+        area: list of (i,j) cells to ignite and burn out before main ignition
+        """
+        # Ignite and let it burn out
+        self.ignite(area)
+        self.run()
+        # Clear all BURNED cells permanently
+        self.fuel[self.state == BURNED] = EMPTY
+        # Reset any residual burning
+        self.state[self.state == BURNING] = EMPTY
+
+# --- Example usage and comparison ---
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    
+    strategies = ['none', 'gap', 'nuke', 'controlled']
+    results = {}
+
+    for strat in strategies:
+        sim = WildfireSimulator(size=(100,100), p_tree=0.6, spread_prob=0.4)
+
+        # Apply mitigation
+        if strat == 'gap':
+            sim.apply_gap(orientation='horizontal', width=5)
+        elif strat == 'nuke':
+            sim.apply_nuke(center=(50,50), radius=20)
+        elif strat == 'controlled':
+            # controlled burn: a small square in the corner
+            area = [(i,j) for i in range(5,15) for j in range(5,15)]
+            sim.apply_controlled_burn(area)
+
+        # Ignite main fire at the center
+        sim.ignite([(50,50)])
+        T = sim.run(max_steps=300)
+        burned_frac = sim.burned_fraction()
+        results[strat] = (T, burned_frac)
+
+        # Optional: visualize final state
+        plt.subplot(2,2,strategies.index(strat)+1)
+        plt.imshow(sim.state, cmap='viridis', interpolation='nearest')
+        plt.title(f"{strat}: t={T}, burn={burned_frac:.2%}")
+        plt.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+    # Print summary
+    for strat,(t,bf) in results.items():
+        print(f"{strat:10s} → time: {t:3d} steps, burned: {bf:.1%}")
