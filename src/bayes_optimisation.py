@@ -20,6 +20,9 @@ class BayesianParameterEstimation:
         """
         self.fire_name = fire_name
         self.grid_size = grid_size
+        self.slope = slope
+        self.elevation = elevation
+        self.aspect = aspect
         self.ca_model = None
         self.trace = None
         self.parameter_ranges = {
