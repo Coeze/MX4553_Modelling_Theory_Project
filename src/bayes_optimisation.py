@@ -33,7 +33,7 @@ class BayesianParameterEstimation:
             'p2': (0.05, 0.2)  # Percolation vegetation diversity parameter
         }
         
-    def setup_ca_model(self, params):
+    def setup_ca_model(self, params, slope, elevation, aspect):
         """Set up the CA model with given parameters
         
         Parameters:
@@ -75,7 +75,7 @@ class BayesianParameterEstimation:
         - metrics: dict, evaluation metrics including sorensen index, accuracy, etc.
         """
         # Set up CA model with parameters
-        ca_model = self.setup_ca_model(params)
+        ca_model = self.setup_ca_model(params, self.slope, self.elevation, self.aspect)
         
         # Run simulation
         ca_model.run_simulation(steps=simulation_steps, stochastic=True)
