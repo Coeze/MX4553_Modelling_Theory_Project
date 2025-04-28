@@ -229,10 +229,9 @@ class CA:
         # Combine all factors, including percolation
         adjusted_probability = base_probability * temperature_effects * moisture_effect * percolation_factor
         
-        # Print for debugging (can be removed or made conditional in production)
-        print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, " +
-              f"p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, " +
-              f"precipitation: {precipitation_effect}, pc: {pc}, exceeds_threshold: {exceeds_threshold}")
+        # print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, " +
+        #       f"p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, " +
+        #       f"precipitation: {precipitation_effect}, pc: {pc}, exceeds_threshold: {exceeds_threshold}")
         
         # Ensure probability is in [0, 1] range
         return min(1, adjusted_probability)
