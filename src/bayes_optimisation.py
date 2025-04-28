@@ -7,7 +7,7 @@ from scipy import stats
 import pandas as pd
 from tqdm.notebook import tqdm
 import warnings
-from .models import CA
+from .model import CA
 
 
 class BayesianParameterEstimation:
