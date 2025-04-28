@@ -46,7 +46,7 @@ class BayesianParameterEstimation:
         print('fgh')
         ca_model.load_mtbs_fire_data(self.fire_name)
         print('sdf')
-        ca_model.initialise_ndvi_from_data(fire)
+        ca_model.initialise_ndvi_from_data(self.fire_name)
         print('rf')
         ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
         print('sdf')
