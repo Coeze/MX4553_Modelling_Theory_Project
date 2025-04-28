@@ -55,8 +55,10 @@ class BayesianParameterEstimation:
         )
 
         ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
+        print('he')
+        print(self.slope)
         ca_model.initialise_ndvi_from_data(fire)
-        
+        print('tst')
         return ca_model
     
     def evaluate_model(self, params, simulation_steps=50):
