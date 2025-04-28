@@ -1,0 +1,110 @@
+import numpy as np
+from src.model import CA
+
+def apply_gap_strategy(model: CA, steps: int,
+                       orientation: str = 'horizontal',
+                       width: int = 3,
+                       position: int = None) -> list:
+    """
+    Create a fuel-gap (firebreak) by lowering vegetation density
+    along a straight line of given width.
+    
+    Parameters:
+    - model: CA model
+    - steps: total steps to run after creating the gap
+    - orientation: 'horizontal' or 'vertical'
+    - width: thickness of gap in cells
+    - position: row (if horizontal) or col (if vertical) index
+                at center of gap (defaults to mid-grid)
+    
+    Returns:
+    - history: grid states at each time step
+    """
+    # pick center line if not specified
+    if position is None:
+        position = model.rows // 2 if orientation == 'horizontal' else model.cols // 2
+
+    if orientation == 'horizontal':
+        r0 = max(0, position - width // 2)
+        r1 = min(model.rows, position + width // 2 + 1)
+        for y in range(r0, r1):
+            for x in range(model.cols):
+                model.ndvi[y, x] = 0.05
+                model.fuel_type[y, x] = 5
+    else:
+        c0 = max(0, position - width // 2)
+        c1 = min(model.cols, position + width // 2 + 1)
+        for y in range(model.rows):
+            for x in range(c0, c1):
+                model.ndvi[y, x] = 0.05
+                model.fuel_type[y, x] = 5
+
+    return model.run_simulation(steps, save_history=True)
+
+
+def apply_nuke_strategy(model: CA, steps: int,
+                        center: tuple = None,
+                        radius: int = 10) -> list:
+    """
+    “Nuke” a circular area: instantly remove all fuel in radius.
+    
+    Parameters:
+    - model: CA model
+    - steps: total steps to run after clearing
+    - center: (row, col) of blast center (defaults to grid center)
+    - radius: blast radius in cells
+    
+    Returns:
+    - history: grid states at each time step
+    """
+    # default to center of grid
+    if center is None:
+        center = (model.rows // 2, model.cols // 2)
+    cy, cx = center
+
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            y, x = cy + dy, cx + dx
+            if 0 <= y < model.rows and 0 <= x < model.cols and dy**2 + dx**2 <= radius**2:
+                model.ndvi[y, x] = 0.0
+                model.fuel_type[y, x] = 0  # totally non-burnable
+
+    return model.run_simulation(steps, save_history=True)
+
+
+def apply_controlled_burn_strategy(model: CA, steps: int,
+                                   patch_size: int = 10) -> list:
+    """
+    Controlled-burn a small square patch to consume fuel pre-emptively.
+    
+    Parameters:
+    - model: CA model
+    - steps: total steps to run after the burn
+    - patch_size: side length of square pre-burn patch (cells)
+    
+    Returns:
+    - history: grid states at each time step
+    """
+    # define a corner patch (you can choose any location)
+    origin_y = (model.rows - patch_size) // 2
+    origin_x = (model.cols - patch_size) // 2
+
+    # ignite the patch
+    for y in range(origin_y, origin_y + patch_size):
+        for x in range(origin_x, origin_x + patch_size):
+            model.grid[y, x] = 1  # burning state
+
+    # let the patch burn itself out
+    history = model.run_simulation(patch_size * 2, save_history=True)
+
+    # clear burned cells permanently
+    burned = (model.grid == 2)  # assuming 2 == burned
+    model.ndvi[burned] = 0.0
+    model.fuel_type[burned] = 0
+
+    # now ignite main fire at center and run full simulation
+    center = (model.rows // 2, model.cols // 2)
+    model.grid[center] = 1
+    history += model.run_simulation(steps, save_history=True)
+
+    return history
