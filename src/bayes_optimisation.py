@@ -254,7 +254,7 @@ class BayesianParameterEstimation:
                         print(f"New best score: {best_score:.4f} with params: {best_params}")
                 
                 except Exception as e:
-                    particles['score'][i] = 0.0
+                    print(e)
             
             # Stop early if we've reached a very good fit
             if best_score > 0.95:
