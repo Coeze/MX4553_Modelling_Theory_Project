@@ -681,13 +681,6 @@ class CA:
         # We'll apply the stochastic process to the mean humidity and adjust the entire grid
         self.humidity += theta_humid * (mu_humid - self.humidity) * dt + sigma_humid * dW_humid
         self.humidity = max(5, min(100, self.humidity))
-
-        
-        # Adjust the entire humidity grid proportionally
-        if mu_humid > 0:  # Avoid division by zero
-            self.humidity = self.humidity * (mean_humidity / mu_humid)
-            # Ensure values are in valid range
-            self.humidity = np.clip(self.humidity, 5, 100)
         
         # Update precipitation
         self.precipitation += theta_precip * (mu_precip - self.precipitation) * dt + sigma_precip * dW_precip
@@ -698,14 +691,14 @@ class CA:
         print(f"  Wind speed: {self.wind_speed:.2f} m/s")
         print(f"  Wind direction: {self.wind_direction:.2f}°")
         print(f"  Temperature: {self.temperature:.2f}°F")
-        print(f"  Mean humidity: {np.mean(self.humidity):.2f}%")
+        print(f"  humidity: {self.humidity:.2f}")
         print(f"  Precipitation: {self.precipitation:.2f} mm")
         
         return {
             'wind_speed': self.wind_speed,
             'wind_direction': self.wind_direction,
             'temperature': self.temperature,
-            'humidity': np.mean(self.humidity),
+            'humidity': self.humidity,
             'precipitation': self.precipitation
         }
 
