@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements and evaluates a cellular automata (CA) model for wildfire spread simulation, optimized using genetic algorithms. The model incorporates environmental factors such as topography, vegetation patterns, wind conditions, and humidity to predict fire behavior. Additionally, it evaluates different firefighting and intervention strategies to identify the most effective approaches for containing wildfires.
+This project implements and evaluates a cellular automata (CA) model for wildfire spread simulation, optimised using genetic algorithms. The model incorporates environmental factors such as topography, vegetation patterns, wind conditions, and humidity to predict fire behavior. Additionally, it evaluates different firefighting and intervention strategies to identify the most effective approaches for containing wildfires.
 
 ## Repository Structure
 
@@ -12,7 +12,7 @@ This project implements and evaluates a cellular automata (CA) model for wildfir
 - **data/**: Contains MTBS (Monitoring Trends in Burn Severity) fire datasets
   - Each subfolder contains data for a specific historical fire event
 - **main.ipynb**: Main notebook for running simulations and evaluating intervention strategies [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Coeze/MX4553_Modelling_Theory_Project/blob/main/main.ipynb)
-- **calibration.ipynb**: Notebook for optimizing model parameters using genetic algorithms [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Coeze/MX4553_Modelling_Theory_Project/blob/main/calibration.ipynb)
+- **calibration.ipynb**: Notebook for optimising model parameters using genetic algorithms [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Coeze/MX4553_Modelling_Theory_Project/blob/main/calibration.ipynb)
 - **cnn_detection.ipynb**: Experimental machine learning approach for fire detection [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Coeze/MX4553_Modelling_Theory_Project/blob/main/cnn_detection.ipynb)
 
 
@@ -28,7 +28,7 @@ The wildfire spread model is built on several key components:
    - Weather conditions (wind speed, wind direction, humidity, temperature)
    - Fuel types and characteristics
 
-3. **Parameter Optimization**: Uses genetic algorithms to optimize model parameters (base spread probability, wind effects) based on the Sørensen index (Dice coefficient) between simulated and actual burn areas.
+3. **Parameter Optimisation**: Uses genetic algorithms to optimise model parameters (base spread probability, wind effects) based on the Sørensen index (Dice coefficient) between simulated and actual burn areas.
 
 4. **Intervention Strategy Evaluation**: Simulates and compares various firefighting strategies:
    - Firebreaks
@@ -39,7 +39,7 @@ The wildfire spread model is built on several key components:
 
 ## Model Parameters
 
-The model uses three key parameters that are optimized using genetic algorithms:
+The model uses three key parameters that are optimised using genetic algorithms:
 
 1. **p0**: Base probability of fire spread (0.1-0.9)
 2. **c1**: Wind effect coefficient - controls how much wind speed affects spread probability
@@ -49,7 +49,7 @@ The model uses three key parameters that are optimized using genetic algorithms:
 
 The model uses data from the Monitoring Trends in Burn Severity (MTBS) program, which provides:
 - Burn perimeter shapefiles
-- Differenced Normalized Burn Ratio (dNBR) rasters
+- Differenced Normalised Burn Ratio (dNBR) rasters
 - Pre-fire and post-fire reflectance data
 - Fire metadata
 
@@ -62,17 +62,17 @@ The model uses data from the Monitoring Trends in Burn Severity (MTBS) program, 
 
 ### Running the Model
 
-1. **Parameter Optimization**:
+1. **Parameter Optimisation**:
    ```
    jupyter notebook calibration.ipynb
    ```
-   This will find optimal parameters using genetic algorithms and save them to `optimal_parameters.json`.
+   This will find optimal parameters using genetic algorithms.
 
 2. **Simulation and Intervention Analysis**:
    ```
    jupyter notebook main.ipynb
    ```
-   This will load the optimized parameters and run simulations to evaluate different intervention strategies.
+   This will load the optimised parameters and run simulations to evaluate different intervention strategies.
 
 ## Evaluation Metrics
 
@@ -101,7 +101,7 @@ The model evaluates several intervention strategies:
 
 - Integration with real-time weather data
 - Machine learning for real-time prediction of fire behavior
-- Web-based visualization interface
+- Web-based visualisation interface
 - Integration with remote sensing data for early detection
 
 ## Acknowledgments
