@@ -398,3 +398,305 @@ if __name__ == '__main__':
     fig.savefig('comparison.png')
     logger.info('Simulation complete, output saved.')
 
+
+
+
+# =============================================================================
+# Section 1: Imports
+# =============================================================================
+import os
+import math
+import random
+import numpy as np
+import pandas as pd
+import rasterio
+from rasterio import features
+from rasterio.transform import from_origin
+import geopandas as gpd
+import fiona
+import matplotlib.pyplot as plt
+from matplotlib_scalebar.scalebar import ScaleBar
+from matplotlib.animation import FuncAnimation
+from shapely.geometry import mapping, box
+from scipy.ndimage import convolve
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from deap import base, creator, tools, algorithms
+
+
+# =============================================================================
+# Section 2: Configuration & Constants
+# =============================================================================
+GRID_SIZE = (200, 200)    # rows, cols
+CELL_SIZE = 30            # meters
+FUEL_TYPES = {
+    0: 'Water/Urban',
+    1: 'Grassland',
+    2: 'Shrubs',
+    3: 'Broadleaf Forest',
+    4: 'Coniferous Forest',
+    5: 'Agro-forest'
+}
+STATE_UNBURNT, STATE_BURNING, STATE_BURNT = 0, 1, 2
+
+# Kernel for 8‐neighborhood
+_NEIGHBORHOOD_KERNEL = np.ones((3,3), dtype=int)
+
+
+# =============================================================================
+# Section 3: Data Loaders & Preprocessors
+# =============================================================================
+def load_raster(path, target_shape=GRID_SIZE):
+    """ Load and (if needed) resample a single‐band raster to GRID_SIZE. """
+    with rasterio.open(path) as src:
+        arr = src.read(1)
+        transform = src.transform
+        if arr.shape != target_shape:
+            arr = np.array(
+                features.rasterize([], out_shape=target_shape), 
+                dtype=arr.dtype
+            )  # placeholder for actual resampling logic
+        return arr, transform, src.crs
+
+def load_shapefile(path):
+    """ Load a shapefile into GeoDataFrame. """
+    return gpd.read_file(path)
+
+def vector_to_raster(gdf, out_shape=GRID_SIZE, transform=None):
+    """ Rasterize GeoDataFrame to match grid. """
+    geoms = ((geom, 1) for geom in gdf.geometry)
+    return features.rasterize(geoms, out_shape=out_shape, transform=transform, dtype=np.uint8)
+
+
+# =============================================================================
+# Section 4: Fire Intensity Mapping
+# =============================================================================
+class FireIntensityMapper:
+    """
+    Compute per‐cell fire intensity (e.g. based on DNBR, NDVI).
+    """
+    def __init__(self, dnbr_raster, ndvi_raster):
+        self.dnbr, _, _ = load_raster(dnbr_raster)
+        self.ndvi, _, _ = load_raster(ndvi_raster)
+        # Scale to [0,1]
+        self.intensity = self._normalize(self.dnbr) * 0.7 + self._normalize(self.ndvi) * 0.3
+
+    def _normalize(self, arr):
+        minv, maxv = np.nanmin(arr), np.nanmax(arr)
+        return (arr - minv) / (maxv - minv + 1e-8)
+
+    def get_intensity_map(self):
+        """ Returns a float‐array [0..1] of fire intensity per cell. """
+        return self.intensity
+
+    def plot_intensity(self, ax=None):
+        ax = ax or plt.gca()
+        im = ax.imshow(self.intensity, cmap='hot', interpolation='nearest')
+        plt.colorbar(im, ax=ax, label='Fire Intensity [0–1]')
+        ax.set_title('Fire Intensity Map')
+        ax.axis('off')
+
+
+# =============================================================================
+# Section 5: Fire Extinguishing Strategies
+# =============================================================================
+class WaterDrop:
+    """ Simulate aerial water drops to extinguish fire. """
+    def __init__(self, model, drop_volume=5000):
+        self.model = model
+        self.volume = drop_volume  # liters per drop
+
+    def drop(self, center, radius):
+        """ Reduce burning probability in a circle by humidity boost. """
+        cy, cx = center
+        y, x = np.ogrid[:self.model.rows, :self.model.cols]
+        mask = (y - cy)**2 + (x - cx)**2 <= radius**2
+        self.model.humidity_map[mask] += 50  # +50% humidity
+        self.model.humidity_map = np.clip(self.model.humidity_map, 0, 100)
+
+class FuelBreak:
+    """ Create linear breaks in vegetation (fuel). """
+    @staticmethod
+    def create_gap(model, orientation='horizontal', pos=None, width=5):
+        pos = pos or (model.rows//2 if orientation=='horizontal' else model.cols//2)
+        if orientation=='horizontal':
+            r0, r1 = pos-width//2, pos+width//2+1
+            model.fuel_map[r0:r1, :] = 0
+        else:
+            c0, c1 = pos-width//2, pos+width//2+1
+            model.fuel_map[:, c0:c1] = 0
+
+class ControlledBurn:
+    """ Ignite small patch to consume fuel ahead of main fire. """
+    @staticmethod
+    def execute(model, top_left, size=10):
+        y0, x0 = top_left
+        for y in range(y0, min(y0+size, model.rows)):
+            for x in range(x0, min(x0+size, model.cols)):
+                model.grid[y, x] = STATE_BURNING
+        model.step_simulation(size*2)
+
+
+# =============================================================================
+# Section 6: Fire Spread (Cellular Automaton)
+# =============================================================================
+class FireSpreadCA:
+    """
+    A simple CA to simulate fire spread, using fuel & humidity maps.
+    """
+    def __init__(self, fuel_map, humidity_map, wind=(0,0)):
+        self.rows, self.cols = fuel_map.shape
+        self.grid = np.zeros_like(fuel_map, dtype=int)
+        self.fuel_map = fuel_map.copy()
+        self.humidity_map = humidity_map.copy()
+        self.wind_speed, self.wind_dir = wind
+
+    def ignite(self, points):
+        for y,x in points:
+            self.grid[y,x] = STATE_BURNING
+
+    def step(self):
+        nbr_burning = convolve((self.grid==STATE_BURNING).astype(int),
+                               _NEIGHBORHOOD_KERNEL, mode='constant')
+        new = self.grid.copy()
+        for y in range(self.rows):
+            for x in range(self.cols):
+                if self.grid[y,x]==STATE_UNBURNT and self.fuel_map[y,x]>0:
+                    p_base = 0.3 * self.fuel_map[y,x]
+                    p_hum = max(0, 1 - self.humidity_map[y,x]/100)
+                    p_n = nbr_burning[y,x] / 8
+                    p_final = p_base * p_hum * (1 + 0.2*p_n)
+                    if random.random() < p_final:
+                        new[y,x] = STATE_BURNING
+                elif self.grid[y,x]==STATE_BURNING:
+                    new[y,x] = STATE_BURNT
+        self.grid = new
+
+    def step_simulation(self, steps):
+        history = [self.grid.copy()]
+        for _ in range(steps):
+            if not np.any(self.grid==STATE_BURNING):
+                break
+            self.step()
+            history.append(self.grid.copy())
+        return history
+
+
+# =============================================================================
+# Section 7: Simulation Manager
+# =============================================================================
+class SimulationManager:
+    """
+    Orchestrates loading data, running strategies, and saving results.
+    """
+    def __init__(self, config):
+        self.config = config
+        # load static layers
+        self.fuel_map, self.transform, self.crs = load_raster(config['fuel_raster'])
+        self.humidity_map = np.zeros_like(self.fuel_map) + config.get('initial_humidity', 10)
+        self.mapper = FireIntensityMapper(config['dnbr_raster'], config['ndvi_raster'])
+
+    def run_all(self):
+        mgr = {}
+        # baseline spread
+        ca = FireSpreadCA(self.fuel_map, self.humidity_map, wind=self.config['wind'])
+        ca.ignite([self.config['ignition_point']])
+        mgr['baseline'] = ca.step_simulation(self.config['max_steps'])
+        # fuel break
+        FuelBreak.create_gap(ca, orientation='horizontal', width=10)
+        mgr['fuel_break'] = ca.step_simulation(self.config['max_steps'])
+        # water drop
+        wd = WaterDrop(ca)
+        wd.drop(self.config['ignition_point'], radius=20)
+        mgr['water_drop'] = ca.step_simulation(self.config['max_steps'])
+        # controlled burn
+        ControlledBurn.execute(ca, top_left=(0,0), size=15)
+        mgr['controlled_burn'] = ca.step_simulation(self.config['max_steps'])
+        return mgr
+
+    def save_results(self, history_dict, out_folder):
+        os.makedirs(out_folder, exist_ok=True)
+        for name, hist in history_dict.items():
+            np.save(os.path.join(out_folder, f"{name}_history.npy"), np.array(hist))
+
+
+# =============================================================================
+# Section 8: Metrics & Evaluation
+# =============================================================================
+class MetricsEvaluator:
+    @staticmethod
+    def burned_fraction(grid, fuel_map):
+        total = np.sum(fuel_map>0)
+        burnt = np.sum(grid==STATE_BURNT)
+        return burnt/total if total>0 else 0
+
+    @staticmethod
+    def area_burnt(burnt_frac):
+        return burnt_frac * GRID_SIZE[0] * GRID_SIZE[1] * (CELL_SIZE**2)  # m²
+
+    @staticmethod
+    def compare_histories(hist_dict, fuel_map):
+        stats = {}
+        for name, hist in hist_dict.items():
+            stats[name] = MetricsEvaluator.burned_fraction(hist[-1], fuel_map)
+        return stats
+
+
+# =============================================================================
+# Section 9: Visualization Utilities
+# =============================================================================
+class Viz:
+    @staticmethod
+    def plot_history(hist, title="Simulation", interval=200):
+        fig, ax = plt.subplots(figsize=(6,6))
+        cmap = plt.cm.get_cmap('inferno', 3)
+        def update(i):
+            ax.clear()
+            ax.imshow(hist[i], cmap=cmap, vmin=0, vmax=2)
+            ax.set_title(f"{title} – Step {i}")
+            ax.axis('off')
+        FuncAnimation(fig, update, frames=len(hist), interval=interval)
+        plt.show()
+
+    @staticmethod
+    def side_by_side(latest_maps, names):
+        n = len(latest_maps)
+        fig, axs = plt.subplots(1, n, figsize=(4*n,4))
+        for ax, grid, nm in zip(axs, latest_maps, names):
+            ax.imshow(grid, cmap='hot', interpolation='nearest')
+            ax.set_title(nm)
+            ax.axis('off')
+        plt.tight_layout()
+
+
+# =============================================================================
+# Section 10: Main Execution
+# =============================================================================
+if __name__ == "__main__":
+    # --- Configuration dictionary ---
+    config = {
+        'fuel_raster'   : 'data/fuel.tif',
+        'dnbr_raster'   : 'data/dnbr.tif',
+        'ndvi_raster'   : 'data/ndvi.tif',
+        'initial_humidity': 15,
+        'wind'          : (5.0, 90),     # 5 m/s east
+        'ignition_point': (100, 100),
+        'max_steps'     : 200
+    }
+
+    # Run all scenarios
+    sim = SimulationManager(config)
+    results = sim.run_all()
+    sim.save_results(results, out_folder='outputs/')
+
+    # Evaluate
+    burned_stats = MetricsEvaluator.compare_histories(results, sim.fuel_map)
+    print("Burned fractions by strategy:")
+    for strat, frac in burned_stats.items():
+        print(f"  {strat:15s}: {frac:.2%}")
+
+    # Visualize final maps
+    final_grids = [h[-1] for h in results.values()]
+    Viz.side_by_side(final_grids, list(results.keys()))
+
