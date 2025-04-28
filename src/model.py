@@ -338,7 +338,7 @@ class CA:
         
         return history
     
-    def visualize_simulation(self, history, interval_ms=500):
+    def visualise_simulation(self, history, interval_ms=500):
         """
         Visualize the simulation history
         
