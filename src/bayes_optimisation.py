@@ -69,7 +69,7 @@ class BayesianParameterEstimation:
         ca_model = self.setup_ca_model(params)
         
         # Run simulation
-        ca_model.run_simulation(steps=simulation_steps)
+        ca_model.run_simulation(steps=simulation_steps, stochastic=True)
         
         # Calculate evaluation metrics
         accuracy, precision, recall, sorensen = ca_model.evaluate_simulation()
