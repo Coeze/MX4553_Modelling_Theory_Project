@@ -54,7 +54,7 @@ class BayesianParameterEstimation:
             fire_direction=90.0   # degrees
         )
 
-        ca_model.load_terrain_data(slope, aspect, elevation)
+        ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
         ca_model.initialise_ndvi_from_data(fire)
         
         return ca_model
