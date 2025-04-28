@@ -679,9 +679,9 @@ class CA:
         
         # Update humidity (as a 2D grid)
         # We'll apply the stochastic process to the mean humidity and adjust the entire grid
-        mean_humidity = np.mean(self.humidity)
-        mean_humidity += theta_humid * (mu_humid - mean_humidity) * dt + sigma_humid * dW_humid
-        mean_humidity = max(5, min(100, mean_humidity))
+        self.humidity += theta_humid * (mu_humid - self.humidity) * dt + sigma_humid * dW_humid
+        self.humidity = max(5, min(100, self.humidity))
+
         
         # Adjust the entire humidity grid proportionally
         if mu_humid > 0:  # Avoid division by zero
