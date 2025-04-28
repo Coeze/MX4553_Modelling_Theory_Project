@@ -44,6 +44,8 @@ class BayesianParameterEstimation:
         
         # Load data for the specified fire
         ca_model.load_mtbs_fire_data(self.fire_name)
+        ca_model.initialise_ndvi_from_data(fire)
+        ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
         
         # Set environmental conditions (default values, can be adjusted)
         ca_model.set_environmental_data(
@@ -54,11 +56,9 @@ class BayesianParameterEstimation:
             fire_direction=90.0   # degrees
         )
 
-        ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
-        print('he')
-        print(self.slope)
-        ca_model.initialise_ndvi_from_data(fire)
-        print('tst')
+# Set initial environmental conditions
+model_sde.set_environmental_data(wind_speed=25.0, wind_direction=225.0, 
+                            temperature=50, humidity=5, fire_direction=20)
         return ca_model
     
     def evaluate_model(self, params, simulation_steps=50):
