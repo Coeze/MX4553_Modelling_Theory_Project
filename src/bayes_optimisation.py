@@ -87,7 +87,7 @@ class BayesianParameterEstimation:
         }
     
     
-    def run_sequential_monte_carlo(self, n_particles=10, steps=10, simulation_steps=50):
+    def run_sequential_monte_carlo(self, n_particles=100, steps=100, simulation_steps=50):
         """Run Sequential Monte Carlo for parameter estimation
         
         This is an alternative to MCMC that can be more efficient for complex models
