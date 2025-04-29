@@ -9,6 +9,7 @@ This project implements and evaluates a cellular automata (CA) model for wildfir
 - **src/**
   - **model.py**: Core cellular automata model for fire spread simulation
   - **interventions.py**: Implementation of different firefighting strategies
+  - **bayes_optimisation.py** Implements bayes optimisation using Monte Carlo Simulation to find optimal parameters
 - **data/**: Contains MTBS (Monitoring Trends in Burn Severity) fire datasets
   - Each subfolder contains data for a specific historical fire event
 - **main.ipynb**: Main notebook for running simulations and evaluating intervention strategies [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Coeze/MX4553_Modelling_Theory_Project/blob/main/main.ipynb)
@@ -28,22 +29,23 @@ The wildfire spread model is built on several key components:
    - Weather conditions (wind speed, wind direction, humidity, temperature)
    - Fuel types and characteristics
 
-3. **Parameter Optimisation**: Uses genetic algorithms to optimise model parameters (base spread probability, wind effects) based on the Sørensen index (Dice coefficient) between simulated and actual burn areas.
+3. **Parameter Optimisation**: Uses bayesian optimisation to optimise model parameters (base spread probability, percolation and wind coeffcients) based on the Sørensen index (Dice coefficient) between simulated and actual burn areas.
 
 4. **Intervention Strategy Evaluation**: Simulates and compares various firefighting strategies:
    - Firebreaks
-   - Direct/indirect attack
-   - Aerial operations
-   - Burnout operations
+   - Direct attack
+   - Early Detection
    - Point protection
 
 ## Model Parameters
 
-The model uses three key parameters that are optimised using genetic algorithms:
+The model uses three key parameters that are optimised using bayes optimisation and monte carlo methods:
 
 1. **p0**: Base probability of fire spread (0.1-0.9)
 2. **c1**: Wind effect coefficient - controls how much wind speed affects spread probability
 3. **c2**: Wind direction coefficient - controls the directional influence of wind
+4. **p1**: percolation coefficient 1
+5. **p2** percolation coefficient 2
 
 ## Data Sources
 
@@ -89,17 +91,14 @@ The model evaluates several intervention strategies:
 
 1. **Strategic Firebreaks**: Creating fuel-free barriers to stop fire spread
 2. **Direct Attack**: Directly applying fire retardant to the fire front
-3. **Indirect Attack**: Creating control lines away from the fire edge
-4. **Combined Attack**: Mixing direct and indirect approaches
-5. **Aerial Attack**: Water and retardant drops from aircraft
-6. **Burnout Operations**: Controlled burning between control lines and fire
-7. **Wet Line Strategy**: Creating lines of wet fuels to stop spread
-8. **Point Protection**: Focusing resources on protecting high-value areas
-9. **Early Detection & Response**: Rapid initial attack on new ignitions
+3. **Point Protection**: Focusing resources on protecting high-value areas
+4. **Early Detection & Response**: Rapid initial attack on new ignitions
 
 ## Future Improvements
 
 - Integration with real-time weather data
+- Add spotting to the model
+- Make the Cellular Automata 3D
 - Machine learning for real-time prediction of fire behavior
 - Web-based visualisation interface
 - Integration with remote sensing data for early detection
