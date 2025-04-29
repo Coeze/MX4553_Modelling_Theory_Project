@@ -46,13 +46,9 @@ class BayesianParameterEstimation:
         ca_model = CA(grid_size=self.grid_size, params=params)
         
         # Load data for the specified fire
-        print('fgh')
         ca_model.load_mtbs_fire_data(self.fire_name)
-        print('sdf')
         ca_model.initialise_ndvi_from_data(self.fire_name)
-        print('rf')
         ca_model.load_terrain_data(slope=slope, aspect=aspect, elevation=elevation)
-        print('sdf')
         
         # Set environmental conditions (default values, can be adjusted)
         ca_model.set_environmental_data(
@@ -64,7 +60,7 @@ class BayesianParameterEstimation:
         )
         return ca_model
     
-    def evaluate_model(self, params, simulation_steps=50):
+    def evaluate_model(self, params, simulation_steps=5):
         """Evaluate model with given parameters
         
         Parameters:
@@ -91,7 +87,7 @@ class BayesianParameterEstimation:
         }
     
     
-    def run_sequential_monte_carlo(self, n_particles=1000, steps=5, simulation_steps=50):
+    def run_sequential_monte_carlo(self, n_particles=10, steps=5, simulation_steps=5):
         """Run Sequential Monte Carlo for parameter estimation
         
         This is an alternative to MCMC that can be more efficient for complex models
