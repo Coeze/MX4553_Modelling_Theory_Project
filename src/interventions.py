@@ -34,7 +34,7 @@ def apply_firebreak_strategy(model, steps):
     # Run the simulation
     return model.run_simulation(steps, True)
 
-def apply_direct_attack_strategy(model, steps, time_before_detection=20):
+def apply_direct_attack_strategy(model, steps, time_before_detection=2):
     """
     Apply a direct attack strategy targeting the fire perimeter
     
