@@ -223,12 +223,11 @@ class CA:
         base_probability = self.p0 * (1+highest_veg_prob) * (1+p_density) * wind_effects * topography_effects
         
         # # Apply temperature and moisture effects
-        # moisture_effect = 1.0 / (humidity_effects * precipitation_effect)
-        # moisture_effect = min(moisture_effect, 5.0)  # Cap the effect to avoid extreme values
+        moisture_effect = 1.0 / (humidity_effects * precipitation_effect)
+        moisture_effect = min(moisture_effect, 5.0)  # Cap the effect to avoid extreme values
         
         # Combine all factors, including percolation
-        adjusted_probability = base_probability 
-        # * temperature_effects * moisture_effect * percolation_factor
+        adjusted_probability = base_probability * temperature_effects * moisture_effect * percolation_factor
         # print(f" prob: {self.p0}, we: {wind_effects}, a_prob: {adjusted_probability}, tp: {highest_veg_prob}, " +
         #       f"p_density: {p_density}, humidity: {humidity_effects}, temperature: {temperature_effects}, " +
         #       f"precipitation: {precipitation_effect}, pc: {pc}, exceeds_threshold: {exceeds_threshold}")
