@@ -34,7 +34,7 @@ def apply_firebreak_strategy(model, steps):
     # Run the simulation
     return model.run_simulation(steps, True)
 
-def apply_direct_attack_strategy(model, steps):
+def apply_direct_attack_strategy(model, steps, time_before_detection=20):
     """
     Apply a direct attack strategy targeting the fire perimeter
     
@@ -46,7 +46,7 @@ def apply_direct_attack_strategy(model, steps):
     - history: list of grid states at each time step
     """
     # Setup - first let fire establish slightly
-    history = model.run_simulation(20)
+    history = model.run_simulation(time_before_detection)
     
     # For each step, apply direct attack to the fire perimeter
     for step in range(steps - 2):
